@@ -53,7 +53,7 @@
     <div id="view-user">
         <div class="panel">
             <h2 id="displayPrizeTitle">Cargando sorteo...</h2>
-            <img id="displayPrizeImg" style="width:100%; height:220px; object-fit:cover; border-radius:15px; margin:15px 0; display:none;">
+            <img id="displayPrizeImg" style="width:100%; height:250px; object-fit:cover; border-radius:15px; margin:15px 0; display:none;">
             <p id="displayPrizeDesc" style="color:#94a3b8; font-size: 0.9rem;"></p>
             <h3 style="color:#fbbf24; margin-top:10px;">Boleto: <span id="displayPrice">$0</span> COP</h3>
         </div>
@@ -96,6 +96,10 @@
                 <input type="text" id="setPrizeTitle" placeholder="Nombre del Premio">
                 <input type="text" id="setPrizeDesc" placeholder="Descripción">
                 <input type="number" id="setPrizePrice" placeholder="Precio por boleto">
+                <div style="margin-top:10px;">
+                    <label style="font-size:0.75rem; color:#94a3b8;">Cambiar Imagen:</label>
+                    <input type="file" id="setPrizeFile" accept="image/*" onchange="uploadImg(this)" style="margin-top:5px; font-size:0.75rem;">
+                </div>
             </div>
             <button class="btn btn-primary" style="margin-top:15px; width:100%" onclick="saveConfig()">Actualizar Datos</button>
         </div>
@@ -118,13 +122,12 @@
 </div>
 
 <script>
-    // Base de datos local/global
     window.db = JSON.parse(localStorage.getItem('bomba_v3_db')) || {
-        prize: "Gran Sorteo", desc: "Participa ahora", price: 20000, img: "", soldNumbers: {}
+        prize: "Cargando...", desc: "", price: 20000, img: "", soldNumbers: {}
     };
 
     let selected = [];
-    const WHATSAPP_NUMBER = "573028115711"; // TU NÚMERO AQUÍ
+    const WHATSAPP_NUMBER = "573028115711"; 
 
     function showTab(tab) {
         document.getElementById('view-user').classList.add('hidden');
@@ -163,6 +166,10 @@
         document.getElementById('displayPrizeDesc').textContent = window.db.desc;
         document.getElementById('displayPrice').textContent = new Intl.NumberFormat('es-CO').format(window.db.price);
         
+        const imgEl = document.getElementById('displayPrizeImg');
+        if(window.db.img) { imgEl.src = window.db.img; imgEl.style.display = 'block'; }
+        else { imgEl.style.display = 'none'; }
+
         initGrid();
 
         document.getElementById('selectionSummary').innerHTML = selected.length ? 
@@ -170,7 +177,7 @@
 
         let soldCount = Object.keys(window.db.soldNumbers).length;
         document.getElementById('progFill').style.width = (soldCount/10) + "%";
-        document.getElementById('progText').textContent = `${soldCount}/1000 Boletos Reservados`;
+        document.getElementById('progText').textContent = `${soldCount}/1000 Reservas`;
 
         const table = document.getElementById('salesTable');
         table.innerHTML = '';
@@ -209,8 +216,16 @@
     function sendTicket(cel, nom) {
         let nums = Object.keys(window.db.soldNumbers).filter(n => window.db.soldNumbers[n].celular === cel);
         let estado = window.db.soldNumbers[nums[0]].pagado ? "✅ PAGADO" : "⏳ PENDIENTE";
-        const msg = `*COMPROBANTE SB DINÁMICAS* 🎟️%0A%0A👤 *Cliente:* ${nom}%0A🔢 *Números:* ${nums.join(' - ')}%0A📌 *Estado:* ${estado}%0A💰 *Total:* $${new Intl.NumberFormat('es-CO').format(nums.length * window.db.price)}%0A%0A_¡Mucha suerte!_ 🍀`;
+        const msg = `*RECIBO SB DINÁMICAS* 🎟️%0A%0A👤 *Cliente:* ${nom}%0A🔢 *Tus Números:* ${nums.join(' - ')}%0A📌 *Estado:* ${estado}%0A💰 *Total:* $${new Intl.NumberFormat('es-CO').format(nums.length * window.db.price)}%0A%0A_¡Gracias por participar!_`;
         window.open(`https://wa.me/57${cel}?text=${msg}`);
+    }
+
+    function uploadImg(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => { window.db.img = e.target.result; save(); alert("Imagen cargada"); };
+            reader.readAsDataURL(input.files[0]);
+        }
     }
 
     function togglePaid(n) { window.db.soldNumbers[n].pagado = !window.db.soldNumbers[n].pagado; save(); }
@@ -227,7 +242,6 @@
         if (window.saveToFirestore) window.saveToFirestore();
         updateUI();
     }
-
     updateUI();
 </script>
 
@@ -238,7 +252,8 @@
 
     const firebaseConfig = {
         apiKey: "AIzaSyC8j6OmhdGkyF_Jw0Fz88BG0fWuixnY-EY",
-        authDomain: "sbdinamicas-2025.firebaseapp.com",
+        authDomain: 
+"sbdinamicas-2025.firebaseapp.com",
         projectId: "sbdinamicas-2025",
         storageBucket: "sbdinamicas-2025.firebasestorage.app",
         messagingSenderId: "465275725018",
@@ -250,14 +265,11 @@
     const auth = getAuth(app);
     const docRef = doc(firestore, "sorteos", "principal");
 
-    // Login
     document.getElementById('btnLoginFirebase').onclick = async () => {
-        const e = document.getElementById('adminEmail').value;
-        const p = document.getElementById('adminPass').value;
         try {
-            await signInWithEmailAndPassword(auth, e, p);
+            await signInWithEmailAndPassword(auth, document.getElementById('adminEmail').value, document.getElementById('adminPass').value);
             showTab('admin-panel');
-        } catch (err) { alert("Acceso denegado"); }
+        } catch (err) { alert("Usuario o clave incorrectos"); }
     };
 
     document.getElementById('btnLogout').onclick = () => signOut(auth).then(() => showTab('user'));
@@ -272,14 +284,7 @@
         }
     });
 
-    // Firestore Sync
-    onSnapshot(docRef, snap => {
-        if(snap.exists()) {
-            window.db = snap.data();
-            updateUI();
-        }
-    });
-
+    onSnapshot(docRef, snap => { if(snap.exists()) { window.db = snap.data(); updateUI(); } });
     window.saveToFirestore = () => setDoc(docRef, window.db);
 </script>
 </body>
