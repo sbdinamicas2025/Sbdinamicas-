@@ -1,167 +1,286 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DINÁMICAS BOMBA - Pro</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-<style>
-/* ======= TU CSS ORIGINAL SIN CAMBIOS ======= */
-:root{
---primary:#6366f1;--secondary:#a855f7;--accent:#f43f5e;
---glass:rgba(255,255,255,.05);--glass-border:rgba(255,255,255,.1);
---text-main:#f8fafc;--color-libre:rgba(255,255,255,.03);
---color-seleccionado:#6366f1;--color-apartado:#fbbf24;--color-pagado:#22c55e
-}
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Plus Jakarta Sans',sans-serif}
-body{background:radial-gradient(circle at top right,#0f172a,#020617);color:var(--text-main);min-height:100vh;padding:15px}
-header,.panel,.admin-card{background:var(--glass);backdrop-filter:blur(15px);border:1px solid var(--glass-border);border-radius:24px;padding:20px;margin-bottom:20px}
-h1{background:linear-gradient(to right,#fbbf24,#22c55e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:2rem;font-weight:800;text-align:center}
-.hidden{display:none!important}
-.btn{padding:12px 20px;border-radius:12px;border:none;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
-.btn-primary{background:var(--primary);color:#fff}
-.btn-success{background:#22c55e;color:#fff;width:100%;justify-content:center}
-input{background:rgba(0,0,0,.4);border:1px solid var(--glass-border);padding:12px;border-radius:12px;color:white;width:100%}
-.numbers-container{height:400px;overflow-y:auto;padding:15px;background:rgba(0,0,0,.3);border-radius:18px;border:1px solid var(--glass-border)}
-.numbers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(50px,1fr));gap:8px}
-.number-item{aspect-ratio:1;background:var(--color-libre);border:1px solid var(--glass-border);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;cursor:pointer;font-size:.7rem;color:#94a3b8}
-.number-item.selected{background:var(--color-seleccionado);color:white}
-.number-item.apartado{background:var(--color-apartado);color:#000}
-.number-item.pagado{background:var(--color-pagado);color:#fff;cursor:not-allowed}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SB DINÁMICAS - Sorteos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1; --accent: #f43f5e;
+            --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc; --color-libre: rgba(255, 255, 255, 0.03);
+            --color-seleccionado: #6366f1; --color-apartado: #fbbf24; --color-pagado: #22c55e;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: radial-gradient(circle at top right, #0f172a, #020617); color: var(--text-main); min-height: 100vh; padding: 15px; }
+        header, .panel, .admin-card { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 20px; margin-bottom: 20px; }
+        h1 { background: linear-gradient(to right, #fbbf24, #22c55e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 2.2rem; font-weight: 800; text-align: center; }
+        .numbers-container { height: 400px; overflow-y: auto; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 18px; border: 1px solid var(--glass-border); }
+        .numbers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px; }
+        .number-item { aspect-ratio: 1; background: var(--color-libre); border: 1px solid var(--glass-border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 0.75rem; color: #94a3b8; }
+        .number-item.selected { background: var(--color-seleccionado); color: white; box-shadow: 0 0 12px var(--color-seleccionado); border: none; }
+        .number-item.apartado { background: var(--color-apartado); color: #000; border: none; }
+        .number-item.pagado { background: var(--color-pagado); color: #fff; border: none; cursor: not-allowed; }
+        .form-user { display: grid; gap: 10px; margin-top: 15px; }
+        input { background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; color: white; width: 100%; outline: none; }
+        .btn { padding: 12px 20px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: #22c55e; color: white; width: 100%; font-size: 1.1rem; }
+        .hidden { display: none !important; }
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; }
+        .bg-wait { background: var(--color-apartado); color: #000; }
+        .bg-paid { background: var(--color-pagado); color: #fff; }
+        .admin-table-container { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border); }
+        .progress-bar-bg { background: rgba(0,0,0,0.4); height: 18px; border-radius: 10px; overflow: hidden; position: relative; margin: 10px 0; }
+        .progress-bar-fill { background: linear-gradient(90deg, #fbbf24, #22c55e); height: 100%; width: 0%; transition: 1s; }
+    </style>
 </head>
-
 <body>
 
-<div class="container" style="max-width:900px;margin:auto">
+<div class="container" style="max-width: 900px; margin: 0 auto;">
+    <header>
+        <h1>SB DINÁMICAS</h1>
+        <div style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
+            <button class="btn btn-primary" onclick="showTab('user')"><i class="fas fa-ticket-alt"></i> Sorteo</button>
+            <button class="btn btn-primary" onclick="showTab('admin-login')"><i class="fas fa-lock"></i> Admin</button>
+        </div>
+    </header>
 
-<header>
-<h1>DINÁMICAS BOMBA</h1>
-<div style="display:flex;justify-content:center;gap:8px;margin-top:15px">
-<button class="btn btn-primary" onclick="showTab('user')">🎟 Sorteo</button>
-<button class="btn btn-primary" onclick="showTab('admin-login')">🔐 Admin</button>
-</div>
-</header>
+    <div id="view-user">
+        <div class="panel">
+            <h2 id="displayPrizeTitle">Cargando sorteo...</h2>
+            <img id="displayPrizeImg" style="width:100%; height:220px; object-fit:cover; border-radius:15px; margin:15px 0; display:none;">
+            <p id="displayPrizeDesc" style="color:#94a3b8; font-size: 0.9rem;"></p>
+            <h3 style="color:#fbbf24; margin-top:10px;">Boleto: <span id="displayPrice">$0</span> COP</h3>
+        </div>
 
-<!-- USUARIO -->
-<div id="view-user">
-<div class="panel">
-<h2 id="displayPrizeTitle"></h2>
-<img id="displayPrizeImg" style="width:100%;height:220px;object-fit:cover;border-radius:15px;margin:15px 0">
-<p id="displayPrizeDesc"></p>
-<h3>Boleto: <span id="displayPrice"></span> COP</h3>
-</div>
+        <div class="panel">
+            <div class="numbers-container"><div class="numbers-grid" id="mainGrid"></div></div>
+            <div style="display:flex; gap:15px; margin-top:15px; font-size:0.75rem; justify-content: center; opacity: 0.8;">
+                <span><span style="display:inline-block; width:10px; height:10px; background:var(--color-libre); margin-right:5px; border-radius:2px;"></span>Libre</span>
+                <span><span style="display:inline-block; width:10px; height:10px; background:var(--color-apartado); margin-right:5px; border-radius:2px;"></span>Apartado</span>
+                <span><span style="display:inline-block; width:10px; height:10px; background:var(--color-pagado); margin-right:5px; border-radius:2px;"></span>Pagado</span>
+            </div>
+        </div>
 
-<div class="panel">
-<div class="numbers-container">
-<div class="numbers-grid" id="mainGrid"></div>
-</div>
-</div>
+        <div class="panel">
+            <h3>Tus Datos</h3>
+            <div class="form-user">
+                <input type="text" id="uNombre" placeholder="Nombre completo">
+                <input type="text" id="uCiudad" placeholder="Ciudad (Ej: Cali)">
+                <input type="tel" id="uCelular" placeholder="Celular (Ej: 300...)">
+            </div>
+            <div id="selectionSummary" style="margin:20px 0; font-weight:800; color:#fbbf24; text-align:center; min-height: 40px;"></div>
+            <button class="btn btn-success" onclick="sendWhatsApp()"><i class="fab fa-whatsapp"></i> APARTAR POR WHATSAPP</button>
+        </div>
+    </div>
 
-<div class="panel">
-<input id="uNombre" placeholder="Nombre">
-<input id="uApellido" placeholder="Apellido" style="margin:8px 0">
-<input id="uCelular" placeholder="Celular">
-<div id="selectionSummary" style="margin:15px 0;font-weight:800;color:#fbbf24;text-align:center"></div>
-<button class="btn btn-success" onclick="sendWhatsApp()">Enviar por WhatsApp</button>
-</div>
-</div>
+    <div id="view-admin-login" class="hidden">
+        <div class="admin-card" style="max-width:350px; margin: 40px auto;">
+            <h2 style="text-align:center;">Acceso Admin</h2>
+            <input type="email" id="adminEmail" placeholder="Correo" style="margin-top:20px;">
+            <input type="password" id="adminPass" placeholder="Contraseña" style="margin:15px 0;">
+            <button class="btn btn-primary" style="width:100%" id="btnLoginFirebase">Entrar</button>
+            <p id="loginError" style="color:var(--accent); font-size:0.8rem; margin-top:10px; text-align:center; display:none;"></p>
+        </div>
+    </div>
 
-<!-- LOGIN ADMIN -->
-<div id="view-admin-login" class="hidden">
-<div class="admin-card" style="max-width:350px;margin:auto">
-<h2>Admin</h2>
-<input type="email" id="adminEmail" placeholder="Email admin">
-<input type="password" id="adminPass" placeholder="Contraseña" style="margin:10px 0">
-<button class="btn btn-primary" style="width:100%" onclick="loginAdmin()">Entrar</button>
-</div>
-</div>
+    <div id="view-admin-panel" class="hidden">
+        <div class="panel">
+            <h3>Configuración Sorteo</h3>
+            <div class="form-user">
+                <input type="text" id="setPrizeTitle" placeholder="Nombre del Premio">
+                <input type="text" id="setPrizeDesc" placeholder="Descripción">
+                <input type="number" id="setPrizePrice" placeholder="Precio por boleto">
+            </div>
+            <button class="btn btn-primary" style="margin-top:15px; width:100%" onclick="saveConfig()">Actualizar Datos</button>
+        </div>
 
-<!-- PANEL ADMIN -->
-<div id="view-admin-panel" class="hidden">
-<div class="panel">
-<h3>Panel Admin</h3>
-<button class="btn" style="background:#475569;color:white" onclick="logoutAdmin()">Cerrar sesión</button>
-</div>
-</div>
-
+        <div class="panel">
+            <h3>Gestión de Ventas</h3>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="progFill"></div></div>
+            <div id="progText" style="text-align:center; font-size:0.75rem; margin-bottom:15px;"></div>
+            
+            <div class="admin-table-container">
+                <table>
+                    <thead><tr><th>Núm</th><th>Participante</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <tbody id="salesTable"></tbody>
+                </table>
+            </div>
+            <button class="btn" style="background:#475569; color:white; margin-top:25px; width:100%;" onclick="clearAllData()">Resetear Sorteo</button>
+            <button class="btn" style="width:100%; margin-top:10px; background:none; color:#94a3b8;" id="btnLogout">Cerrar Sesión</button>
+        </div>
+    </div>
 </div>
 
 <script>
-function showTab(tab){
-['view-user','view-admin-login','view-admin-panel'].forEach(v=>{
-document.getElementById(v).classList.add('hidden')
-})
-document.getElementById('view-'+tab).classList.remove('hidden')
-}
+    // Base de datos local/global
+    window.db = JSON.parse(localStorage.getItem('bomba_v3_db')) || {
+        prize: "Gran Sorteo", desc: "Participa ahora", price: 20000, img: "", soldNumbers: {}
+    };
+
+    let selected = [];
+    const WHATSAPP_NUMBER = "573028115711"; // TU NÚMERO AQUÍ
+
+    function showTab(tab) {
+        document.getElementById('view-user').classList.add('hidden');
+        document.getElementById('view-admin-login').classList.add('hidden');
+        document.getElementById('view-admin-panel').classList.add('hidden');
+        document.getElementById('view-' + tab).classList.remove('hidden');
+    }
+
+    function initGrid() {
+        const grid = document.getElementById('mainGrid');
+        grid.innerHTML = '';
+        for(let i=0; i<1000; i++) {
+            const n = i.toString().padStart(3, '0');
+            const div = document.createElement('div');
+            let estado = '';
+            if(window.db.soldNumbers[n]) {
+                estado = window.db.soldNumbers[n].pagado ? ' pagado' : ' apartado';
+            }
+            div.className = 'number-item' + estado + (selected.includes(n) ? ' selected' : '');
+            div.textContent = n;
+            div.onclick = () => toggleNumber(n);
+            grid.appendChild(div);
+        }
+    }
+
+    function toggleNumber(n) {
+        if(window.db.soldNumbers[n] && window.db.soldNumbers[n].pagado) return;
+        const idx = selected.indexOf(n);
+        if(idx > -1) selected.splice(idx, 1);
+        else if(selected.length < 20) selected.push(n);
+        updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('displayPrizeTitle').textContent = window.db.prize;
+        document.getElementById('displayPrizeDesc').textContent = window.db.desc;
+        document.getElementById('displayPrice').textContent = new Intl.NumberFormat('es-CO').format(window.db.price);
+        
+        initGrid();
+
+        document.getElementById('selectionSummary').innerHTML = selected.length ? 
+            `Seleccionados (${selected.length}): ${selected.join(', ')}<br>Total: $${new Intl.NumberFormat('es-CO').format(selected.length * window.db.price)}` : "";
+
+        let soldCount = Object.keys(window.db.soldNumbers).length;
+        document.getElementById('progFill').style.width = (soldCount/10) + "%";
+        document.getElementById('progText').textContent = `${soldCount}/1000 Boletos Reservados`;
+
+        const table = document.getElementById('salesTable');
+        table.innerHTML = '';
+        Object.keys(window.db.soldNumbers).sort().forEach(n => {
+            const u = window.db.soldNumbers[n];
+            table.innerHTML += `<tr>
+                <td><b>${n}</b></td>
+                <td>${u.nombre}<br><small style="color:#94a3b8">${u.ciudad || ''}</small></td>
+                <td><span class="badge ${u.pagado?'bg-paid':'bg-wait'}">${u.pagado?'PAGO':'ESPERA'}</span></td>
+                <td>
+                    <button onclick="sendTicket('${u.celular}', '${u.nombre}')" style="color:#fbbf24; background:none; border:none; cursor:pointer;"><i class="fas fa-receipt"></i></button>
+                    <button onclick="togglePaid('${n}')" style="color:#22c55e; background:none; border:none; cursor:pointer; margin-left:8px;"><i class="fas fa-check-circle"></i></button>
+                    <button onclick="deleteEntry('${n}')" style="color:#f43f5e; background:none; border:none; cursor:pointer; margin-left:8px;"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    function sendWhatsApp() {
+        const nom = document.getElementById('uNombre').value;
+        const ciu = document.getElementById('uCiudad').value;
+        const cel = document.getElementById('uCelular').value;
+        if(!nom || !ciu || !cel || !selected.length) return alert("Completa todos los datos");
+
+        selected.forEach(n => {
+            window.db.soldNumbers[n] = { nombre: nom, ciudad: ciu, celular: cel, pagado: false };
+        });
+
+        const msg = `¡Hola! 👋 Vengo de SB DINÁMICAS%0A🔢 *Números:* ${selected.join(', ')}%0A👤 *Cliente:* ${nom}%0A📍 *Ciudad:* ${ciu}%0A💰 *Total:* $${new Intl.NumberFormat('es-CO').format(selected.length * window.db.price)}%0A%0A*Espero datos de pago.*`;
+        
+        save();
+        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`);
+        selected = []; updateUI();
+    }
+
+    function sendTicket(cel, nom) {
+        let nums = Object.keys(window.db.soldNumbers).filter(n => window.db.soldNumbers[n].celular === cel);
+        let estado = window.db.soldNumbers[nums[0]].pagado ? "✅ PAGADO" : "⏳ PENDIENTE";
+        const msg = `*COMPROBANTE SB DINÁMICAS* 🎟️%0A%0A👤 *Cliente:* ${nom}%0A🔢 *Números:* ${nums.join(' - ')}%0A📌 *Estado:* ${estado}%0A💰 *Total:* $${new Intl.NumberFormat('es-CO').format(nums.length * window.db.price)}%0A%0A_¡Mucha suerte!_ 🍀`;
+        window.open(`https://wa.me/57${cel}?text=${msg}`);
+    }
+
+    function togglePaid(n) { window.db.soldNumbers[n].pagado = !window.db.soldNumbers[n].pagado; save(); }
+    function deleteEntry(n) { if(confirm("¿Liberar número?")) { delete window.db.soldNumbers[n]; save(); } }
+    function saveConfig() {
+        window.db.prize = document.getElementById('setPrizeTitle').value;
+        window.db.desc = document.getElementById('setPrizeDesc').value;
+        window.db.price = document.getElementById('setPrizePrice').value;
+        save(); alert("Configuración guardada");
+    }
+    function clearAllData() { if(confirm("¿Borrar todas las ventas?")) { window.db.soldNumbers = {}; save(); } }
+    function save() { 
+        localStorage.setItem('bomba_v3_db', JSON.stringify(window.db)); 
+        if (window.saveToFirestore) window.saveToFirestore();
+        updateUI();
+    }
+
+    updateUI();
 </script>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut }
-from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot }
-from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-const firebaseConfig={
-apiKey:"AIzaSyC8j6OmhdGkyF_Jw0Fz88BG0fWuixnY-EY",
-authDomain:"sbdinamicas-2025.firebaseapp.com",
-projectId:"sbdinamicas-2025"
-};
+    const firebaseConfig = {
+        apiKey: "AIzaSyC8j6OmhdGkyF_Jw0Fz88BG0fWuixnY-EY",
+        authDomain: "sbdinamicas-2025.firebaseapp.com",
+        projectId: "sbdinamicas-2025",
+        storageBucket: "sbdinamicas-2025.firebasestorage.app",
+        messagingSenderId: "465275725018",
+        appId: "1:465275725018:web:9f58c09a23a74a419171e3"
+    };
 
-const app=initializeApp(firebaseConfig)
-const auth=getAuth(app)
-const db=getFirestore(app)
-const ref=doc(db,"sorteos","principal")
+    const app = initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+    const auth = getAuth(app);
+    const docRef = doc(firestore, "sorteos", "principal");
 
-let data={prize:"Gran Sorteo",desc:"Participa",price:0,img:"",soldNumbers:{}}
+    // Login
+    document.getElementById('btnLoginFirebase').onclick = async () => {
+        const e = document.getElementById('adminEmail').value;
+        const p = document.getElementById('adminPass').value;
+        try {
+            await signInWithEmailAndPassword(auth, e, p);
+            showTab('admin-panel');
+        } catch (err) { alert("Acceso denegado"); }
+    };
 
-const snap=await getDoc(ref)
-if(!snap.exists()) await setDoc(ref,data)
-else data=snap.data()
+    document.getElementById('btnLogout').onclick = () => signOut(auth).then(() => showTab('user'));
 
-function initGrid(){
-const g=document.getElementById("mainGrid")
-g.innerHTML=""
-for(let i=0;i<1000;i++){
-const n=i.toString().padStart(3,"0")
-const d=document.createElement("div")
-d.textContent=n
-d.className="number-item"
-if(data.soldNumbers[n]) d.classList.add(data.soldNumbers[n].pagado?"pagado":"apartado")
-g.appendChild(d)
-}
-}
+    onAuthStateChanged(auth, user => {
+        if (user) {
+            document.getElementById('setPrizeTitle').value = window.db.prize;
+            document.getElementById('setPrizeDesc').value = window.db.desc;
+            document.getElementById('setPrizePrice').value = window.db.price;
+        } else {
+            document.getElementById('view-admin-panel').classList.add('hidden');
+        }
+    });
 
-function updateUI(){
-displayPrizeTitle.textContent=data.prize
-displayPrizeDesc.textContent=data.desc
-displayPrice.textContent=data.price
-displayPrizeImg.src=data.img
-}
+    // Firestore Sync
+    onSnapshot(docRef, snap => {
+        if(snap.exists()) {
+            window.db = snap.data();
+            updateUI();
+        }
+    });
 
-onSnapshot(ref,s=>{
-data=s.data()
-initGrid()
-updateUI()
-})
-
-window.loginAdmin=async()=>{
-await signInWithEmailAndPassword(auth,adminEmail.value,adminPass.value)
-showTab("admin-panel")
-}
-
-window.logoutAdmin=async()=>{
-await signOut(auth)
-showTab("user")
-}
-
-onAuthStateChanged(auth,u=>{
-if(!u) showTab("user")
-})
+    window.saveToFirestore = () => setDoc(docRef, window.db);
 </script>
 </body>
 </html>
