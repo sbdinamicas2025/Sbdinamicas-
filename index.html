@@ -17,14 +17,35 @@
         body { background: radial-gradient(circle at top right, #0f172a, #020617); color: var(--text-main); min-height: 100vh; padding: 15px; }
         header, .panel, .admin-card { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 20px; margin-bottom: 20px; }
         h1 { background: linear-gradient(to right, #fbbf24, #22c55e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 2.2rem; font-weight: 800; text-align: center; }
+
+        /* SECCIÓN SELECCIÓN RÁPIDA */
+        .quick-select-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 0 5px; gap: 10px; }
+        .quick-label { font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+        .quick-group { display: flex; gap: 6px; }
+        .btn-quick { background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); color: #a5b4fc; padding: 8px 14px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-quick:hover { background: var(--primary); color: white; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
+        .btn-quick-clear { background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.2); color: #fb7185; }
+        .btn-quick-clear:hover { background: var(--accent); border-color: var(--accent); }
+
+        /* DASHBOARD ADMIN */
+        .admin-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .stat-card { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; border: 1px solid var(--glass-border); text-align: center; }
+        .stat-card h4 { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-card p { font-size: 1.1rem; font-weight: 800; color: #fff; }
+        .stat-recargado { color: #22c55e !important; }
+
+        /* ANIMACIÓN POP */
+        @keyframes popSelection { 0% { transform: scale(1); } 50% { transform: scale(1.3); filter: brightness(1.5); } 100% { transform: scale(1); } }
+        .number-pop { animation: popSelection 0.5s ease-out; }
+
         .numbers-container { height: 400px; overflow-y: auto; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 18px; border: 1px solid var(--glass-border); }
         .numbers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px; }
         .number-item { aspect-ratio: 1; background: var(--color-libre); border: 1px solid var(--glass-border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 0.75rem; color: #94a3b8; }
         .number-item.selected { background: var(--color-seleccionado); color: white; box-shadow: 0 0 12px var(--color-seleccionado); border: none; }
         .number-item.apartado { background: var(--color-apartado); color: #000; border: none; }
         .number-item.pagado { background: var(--color-pagado); color: #fff; border: none; cursor: not-allowed; }
-        .form-user { display: grid; gap: 10px; margin-top: 15px; }
-        input { background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; color: white; width: 100%; outline: none; }
+        
+        input { background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; color: white; width: 100%; outline: none; margin-bottom: 10px; }
         .btn { padding: 12px 20px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: #22c55e; color: white; width: 100%; font-size: 1.1rem; }
@@ -32,7 +53,7 @@
         .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; }
         .bg-wait { background: var(--color-apartado); color: #000; }
         .bg-paid { background: var(--color-pagado); color: #fff; }
-        .admin-table-container { overflow-x: auto; margin-top: 20px; }
+        .admin-table-container { overflow-x: auto; margin-top: 10px; max-height: 400px; overflow-y: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border); }
         .progress-bar-bg { background: rgba(0,0,0,0.4); height: 18px; border-radius: 10px; overflow: hidden; position: relative; margin: 10px 0; }
@@ -59,6 +80,15 @@
         </div>
 
         <div class="panel">
+            <div class="quick-select-container">
+                <span class="quick-label"><i class="fas fa-dice"></i> Azar:</span>
+                <div class="quick-group">
+                    <button class="btn-quick" onclick="selectRandom(5)">5</button>
+                    <button class="btn-quick" onclick="selectRandom(10)">10</button>
+                    <button class="btn-quick" onclick="selectRandom(20)">20</button>
+                    <button class="btn-quick btn-quick-clear" onclick="clearSelection()"><i class="fas fa-undo"></i></button>
+                </div>
+            </div>
             <div class="numbers-container"><div class="numbers-grid" id="mainGrid"></div></div>
             <div style="display:flex; gap:15px; margin-top:15px; font-size:0.75rem; justify-content: center; opacity: 0.8;">
                 <span><span style="display:inline-block; width:10px; height:10px; background:var(--color-libre); margin-right:5px; border-radius:2px;"></span>Libre</span>
@@ -85,23 +115,19 @@
             <input type="email" id="adminEmail" placeholder="Correo" style="margin-top:20px;">
             <input type="password" id="adminPass" placeholder="Contraseña" style="margin:15px 0;">
             <button class="btn btn-primary" style="width:100%" id="btnLoginFirebase">Entrar</button>
-            <p id="loginError" style="color:var(--accent); font-size:0.8rem; margin-top:10px; text-align:center; display:none;"></p>
         </div>
     </div>
 
     <div id="view-admin-panel" class="hidden">
-        <div class="panel">
-            <h3>Configuración Sorteo</h3>
-            <div class="form-user">
-                <input type="text" id="setPrizeTitle" placeholder="Nombre del Premio">
-                <input type="text" id="setPrizeDesc" placeholder="Descripción">
-                <input type="number" id="setPrizePrice" placeholder="Precio por boleto">
-                <div style="margin-top:10px;">
-                    <label style="font-size:0.75rem; color:#94a3b8;">Cambiar Imagen:</label>
-                    <input type="file" id="setPrizeFile" accept="image/*" onchange="uploadImg(this)" style="margin-top:5px; font-size:0.75rem;">
-                </div>
+        <div class="admin-stats">
+            <div class="stat-card">
+                <h4>Confirmado</h4>
+                <p id="statRecaudado" class="stat-recargado">$0</p>
             </div>
-            <button class="btn btn-primary" style="margin-top:15px; width:100%" onclick="saveConfig()">Actualizar Datos</button>
+            <div class="stat-card">
+                <h4>Por Cobrar</h4>
+                <p id="statPendiente">$0</p>
+            </div>
         </div>
 
         <div class="panel">
@@ -109,14 +135,36 @@
             <div class="progress-bar-bg"><div class="progress-bar-fill" id="progFill"></div></div>
             <div id="progText" style="text-align:center; font-size:0.75rem; margin-bottom:15px;"></div>
             
+            <input type="text" id="adminSearch" placeholder="🔍 Buscar por número, nombre o ciudad..." oninput="updateUI()">
+
             <div class="admin-table-container">
                 <table>
                     <thead><tr><th>Núm</th><th>Participante</th><th>Estado</th><th>Acciones</th></tr></thead>
                     <tbody id="salesTable"></tbody>
                 </table>
             </div>
-            <button class="btn" style="background:#475569; color:white; margin-top:25px; width:100%;" onclick="clearAllData()">Resetear Sorteo</button>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:20px;">
+                <button class="btn" style="background:rgba(255,255,255,0.1); color:white;" onclick="showTab('admin-config')">Configurar Sorteo</button>
+                <button class="btn" style="background:#475569; color:white;" onclick="clearAllData()">Resetear Todo</button>
+            </div>
             <button class="btn" style="width:100%; margin-top:10px; background:none; color:#94a3b8;" id="btnLogout">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <div id="view-admin-config" class="hidden">
+        <div class="panel">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Configuración del Premio</h3>
+                <button class="btn-quick" onclick="showTab('admin-panel')">Volver</button>
+            </div>
+            <div class="form-user">
+                <input type="text" id="setPrizeTitle" placeholder="Nombre del Premio">
+                <input type="text" id="setPrizeDesc" placeholder="Descripción">
+                <input type="number" id="setPrizePrice" placeholder="Precio por boleto">
+                <input type="file" id="setPrizeFile" accept="image/*" onchange="uploadImg(this)">
+            </div>
+            <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="saveConfig()">Guardar Cambios</button>
         </div>
     </div>
 </div>
@@ -130,9 +178,9 @@
     const WHATSAPP_NUMBER = "573028115711"; 
 
     function showTab(tab) {
-        document.getElementById('view-user').classList.add('hidden');
-        document.getElementById('view-admin-login').classList.add('hidden');
-        document.getElementById('view-admin-panel').classList.add('hidden');
+        ['view-user', 'view-admin-login', 'view-admin-panel', 'view-admin-config'].forEach(v => {
+            document.getElementById(v).classList.add('hidden');
+        });
         document.getElementById('view-' + tab).classList.remove('hidden');
     }
 
@@ -147,6 +195,7 @@
                 estado = window.db.soldNumbers[n].pagado ? ' pagado' : ' apartado';
             }
             div.className = 'number-item' + estado + (selected.includes(n) ? ' selected' : '');
+            div.id = `num-${n}`;
             div.textContent = n;
             div.onclick = () => toggleNumber(n);
             grid.appendChild(div);
@@ -160,6 +209,29 @@
         else if(selected.length < 20) selected.push(n);
         updateUI();
     }
+
+    function selectRandom(qty) {
+        let libres = [];
+        for(let i=0; i<1000; i++) {
+            const n = i.toString().padStart(3, '0');
+            if(!window.db.soldNumbers[n] && !selected.includes(n)) libres.push(n);
+        }
+        if(selected.length >= 20) return alert("Máximo 20 números permitidos");
+        libres.sort(() => Math.random() - 0.5);
+        const espacio = 20 - selected.length;
+        const finalQty = Math.min(qty, espacio, libres.length);
+        for(let i=0; i<finalQty; i++) {
+            const num = libres[i];
+            setTimeout(() => {
+                selected.push(num);
+                updateUI();
+                const el = document.getElementById(`num-${num}`);
+                if(el) el.classList.add('number-pop');
+            }, i * 80);
+        }
+    }
+
+    function clearSelection() { selected = []; updateUI(); }
 
     function updateUI() {
         document.getElementById('displayPrizeTitle').textContent = window.db.prize;
@@ -175,25 +247,53 @@
         document.getElementById('selectionSummary').innerHTML = selected.length ? 
             `Seleccionados (${selected.length}): ${selected.join(', ')}<br>Total: $${new Intl.NumberFormat('es-CO').format(selected.length * window.db.price)}` : "";
 
+        // ESTADÍSTICAS ADMIN
+        let totalRecaudado = 0;
+        let totalPendiente = 0;
         let soldCount = Object.keys(window.db.soldNumbers).length;
-        document.getElementById('progFill').style.width = (soldCount/10) + "%";
-        document.getElementById('progText').textContent = `${soldCount}/1000 Reservas`;
 
         const table = document.getElementById('salesTable');
+        const searchTerm = document.getElementById('adminSearch').value.toLowerCase();
         table.innerHTML = '';
+
         Object.keys(window.db.soldNumbers).sort().forEach(n => {
             const u = window.db.soldNumbers[n];
-            table.innerHTML += `<tr>
-                <td><b>${n}</b></td>
-                <td>${u.nombre}<br><small style="color:#94a3b8">${u.ciudad || ''}</small></td>
-                <td><span class="badge ${u.pagado?'bg-paid':'bg-wait'}">${u.pagado?'PAGO':'ESPERA'}</span></td>
-                <td>
-                    <button onclick="sendTicket('${u.celular}', '${u.nombre}')" style="color:#fbbf24; background:none; border:none; cursor:pointer;"><i class="fas fa-receipt"></i></button>
-                    <button onclick="togglePaid('${n}')" style="color:#22c55e; background:none; border:none; cursor:pointer; margin-left:8px;"><i class="fas fa-check-circle"></i></button>
-                    <button onclick="deleteEntry('${n}')" style="color:#f43f5e; background:none; border:none; cursor:pointer; margin-left:8px;"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>`;
+            const match = n.includes(searchTerm) || u.nombre.toLowerCase().includes(searchTerm) || u.ciudad.toLowerCase().includes(searchTerm);
+            
+            if(u.pagado) totalRecaudado += Number(window.db.price);
+            else totalPendiente += Number(window.db.price);
+
+            if(match) {
+                table.innerHTML += `<tr>
+                    <td><b>${n}</b></td>
+                    <td>${u.nombre}<br><small style="color:#94a3b8">${u.ciudad}</small></td>
+                    <td><span class="badge ${u.pagado?'bg-paid':'bg-wait'}">${u.pagado?'PAGO':'ESPERA'}</span></td>
+                    <td>
+                        <div style="display:flex; gap:8px;">
+                            <button title="Enviar Recibo/Cobro" onclick="sendWhatsAppCobro('${n}')" style="color:#fbbf24; background:none; border:none; cursor:pointer;"><i class="fab fa-whatsapp"></i></button>
+                            <button title="Cambiar Estado" onclick="togglePaid('${n}')" style="color:#22c55e; background:none; border:none; cursor:pointer;"><i class="fas fa-check-circle"></i></button>
+                            <button title="Eliminar" onclick="deleteEntry('${n}')" style="color:#f43f5e; background:none; border:none; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>`;
+            }
         });
+
+        document.getElementById('statRecaudado').textContent = `$${new Intl.NumberFormat('es-CO').format(totalRecaudado)}`;
+        document.getElementById('statPendiente').textContent = `$${new Intl.NumberFormat('es-CO').format(totalPendiente)}`;
+        document.getElementById('progFill').style.width = (soldCount/10) + "%";
+        document.getElementById('progText').textContent = `${soldCount}/1000 Reservas`;
+    }
+
+    function sendWhatsAppCobro(n) {
+        const u = window.db.soldNumbers[n];
+        let msg = "";
+        if(u.pagado) {
+            msg = `*RECIBO DE PAGO SB DINÁMICAS* 🎟️%0A%0AHola *${u.nombre}*, confirmamos tu pago por el número *${n}*.%0A¡Mucha suerte en el sorteo! 🍀`;
+        } else {
+            msg = `*RECORDATORIO DE PAGO SB DINÁMICAS* ⏳%0A%0AHola *${u.nombre}*, te escribimos para recordarte que tienes el número *${n}* reservado.%0A💰 Valor: $${new Intl.NumberFormat('es-CO').format(window.db.price)}%0A¿Deseas confirmar tu participación?`;
+        }
+        window.open(`https://wa.me/57${u.celular}?text=${msg}`);
     }
 
     function sendWhatsApp() {
@@ -213,13 +313,6 @@
         selected = []; updateUI();
     }
 
-    function sendTicket(cel, nom) {
-        let nums = Object.keys(window.db.soldNumbers).filter(n => window.db.soldNumbers[n].celular === cel);
-        let estado = window.db.soldNumbers[nums[0]].pagado ? "✅ PAGADO" : "⏳ PENDIENTE";
-        const msg = `*RECIBO SB DINÁMICAS* 🎟️%0A%0A👤 *Cliente:* ${nom}%0A🔢 *Tus Números:* ${nums.join(' - ')}%0A📌 *Estado:* ${estado}%0A💰 *Total:* $${new Intl.NumberFormat('es-CO').format(nums.length * window.db.price)}%0A%0A_¡Gracias por participar!_`;
-        window.open(`https://wa.me/57${cel}?text=${msg}`);
-    }
-
     function uploadImg(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
@@ -235,6 +328,7 @@
         window.db.desc = document.getElementById('setPrizeDesc').value;
         window.db.price = document.getElementById('setPrizePrice').value;
         save(); alert("Configuración guardada");
+        showTab('admin-panel');
     }
     function clearAllData() { if(confirm("¿Borrar todas las ventas?")) { window.db.soldNumbers = {}; save(); } }
     function save() { 
@@ -252,8 +346,7 @@
 
     const firebaseConfig = {
         apiKey: "AIzaSyC8j6OmhdGkyF_Jw0Fz88BG0fWuixnY-EY",
-        authDomain: 
-"sbdinamicas-2025.firebaseapp.com",
+        authDomain: "sbdinamicas-2025.firebaseapp.com",
         projectId: "sbdinamicas-2025",
         storageBucket: "sbdinamicas-2025.firebasestorage.app",
         messagingSenderId: "465275725018",
@@ -281,6 +374,7 @@
             document.getElementById('setPrizePrice').value = window.db.price;
         } else {
             document.getElementById('view-admin-panel').classList.add('hidden');
+            document.getElementById('view-admin-config').classList.add('hidden');
         }
     });
 
