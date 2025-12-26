@@ -445,6 +445,22 @@
             border-radius: 8px;
             margin: 10px 0;
         }
+        
+        /* ALERTA DE CONFIGURACIÓN */
+        .config-alert {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .config-alert i {
+            color: #fbbf24;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 <body>
@@ -464,6 +480,15 @@
                 <img id="displayPrizeImg" style="width:100%; height:250px; object-fit:cover; border-radius:15px; margin:15px 0; display:none;">
                 <p id="displayPrizeDesc" style="color:#94a3b8; font-size: 0.9rem;"></p>
                 <h3 style="color:#fbbf24; margin-top:10px;">Boleto: <span id="displayPrice">$0</span> COP</h3>
+                
+                <!-- Alerta si WhatsApp no está configurado -->
+                <div id="whatsappAlert" class="config-alert hidden">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p><strong>⚠️ WhatsApp no configurado</strong></p>
+                    <p style="font-size: 0.8rem; margin-top: 5px;">
+                        El administrador debe configurar el número de WhatsApp para poder apartar números.
+                    </p>
+                </div>
             </div>
             
             <div class="panel">
@@ -613,13 +638,44 @@
                 </div>
                 <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="saveConfig()">Guardar Cambios</button>
             </div>
+            
+            <!-- NUEVO: CONFIGURACIÓN DE WHATSAPP -->
+            <div class="panel" style="margin-top: 20px;">
+                <h3><i class="fab fa-whatsapp"></i> Configurar WhatsApp</h3>
+                <div class="config-alert">
+                    <i class="fas fa-shield-alt"></i>
+                    <p><strong>🔒 Protege tu número de WhatsApp</strong></p>
+                    <p style="font-size: 0.8rem; margin-top: 5px;">
+                        Configura aquí tu número para recibir reservas. No lo escribas en el código.
+                    </p>
+                </div>
+                
+                <div class="form-user">
+                    <input type="text" 
+                           id="whatsappConfig" 
+                           placeholder="Ej: 573215714548 (sin espacios, sin +)"
+                           maxlength="12">
+                </div>
+                <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="saveWhatsAppConfig()">
+                    <i class="fas fa-save"></i> Guardar Número WhatsApp
+                </button>
+                <p style="color: #94a3b8; font-size: 0.7rem; margin-top: 10px;">
+                    <strong>Formato:</strong> 57 + número de celular (10 dígitos). Ejemplo: 573001234567
+                </p>
+                <div id="whatsappStatus" style="margin-top: 10px; padding: 10px; border-radius: 8px; display: none;"></div>
+            </div>
         </div>
     </div>
     
     <script>
-        // CONSTANTES
-        const WHATSAPP_NUMBER = "573215714548";
+        // =============================================
+        // CONFIGURACIÓN SEGURA - NO PONGAS TU NÚMERO AQUÍ
+        // =============================================
+        
         const TOTAL_NUMBERS = 1000;
+        
+        // VARIABLE GLOBAL PARA WHATSAPP - INICIALMENTE VACÍA
+        let WHATSAPP_NUMBER = "";
         
         // INICIALIZACIÓN DE DATOS
         window.db = JSON.parse(localStorage.getItem('bomba_v3_db')) || {
@@ -629,7 +685,8 @@
             img: "",
             soldNumbers: {},
             lastSync: null,
-            isAdmin: false
+            isAdmin: false,
+            whatsappNumber: "" // Nuevo campo para WhatsApp
         };
         
         // VARIABLES GLOBALES
@@ -642,7 +699,120 @@
         // REFERENCIAS A ELEMENTOS DEL DOM
         let adminPanelRef = null;
         
+        // =============================================
+        // FUNCIÓN PARA INICIALIZAR WHATSAPP
+        // =============================================
+        function initWhatsAppNumber() {
+            // 1. Intentar cargar desde la base de datos local
+            if (window.db.whatsappNumber && window.db.whatsappNumber.length >= 12) {
+                WHATSAPP_NUMBER = window.db.whatsappNumber;
+                console.log("✅ WhatsApp cargado desde base de datos:", WHATSAPP_NUMBER);
+                hideWhatsAppAlert();
+                return;
+            }
+            
+            // 2. Intentar cargar desde localStorage (backup)
+            const savedNumber = localStorage.getItem('sb_whatsapp_number');
+            if (savedNumber && savedNumber.length >= 12) {
+                WHATSAPP_NUMBER = savedNumber;
+                window.db.whatsappNumber = savedNumber;
+                save(); // Guardar en la base de datos
+                console.log("✅ WhatsApp cargado desde localStorage:", WHATSAPP_NUMBER);
+                hideWhatsAppAlert();
+                return;
+            }
+            
+            // 3. No hay número configurado - Mostrar alerta
+            console.warn("⚠️ WhatsApp no configurado. Por favor configúralo en el panel admin.");
+            showWhatsAppAlert();
+            WHATSAPP_NUMBER = ""; // Mantener vacío
+        }
+        
+        function showWhatsAppAlert() {
+            const alertEl = document.getElementById('whatsappAlert');
+            if (alertEl) {
+                alertEl.classList.remove('hidden');
+            }
+        }
+        
+        function hideWhatsAppAlert() {
+            const alertEl = document.getElementById('whatsappAlert');
+            if (alertEl) {
+                alertEl.classList.add('hidden');
+            }
+        }
+        
+        // =============================================
+        // FUNCIÓN PARA GUARDAR CONFIGURACIÓN DE WHATSAPP
+        // =============================================
+        function saveWhatsAppConfig() {
+            const numberInput = document.getElementById('whatsappConfig').value.trim();
+            const statusEl = document.getElementById('whatsappStatus');
+            
+            // Validaciones
+            if (!numberInput) {
+                showStatus("❌ Por favor ingresa un número", "error");
+                return;
+            }
+            
+            if (numberInput.length < 12) {
+                showStatus("❌ El número debe tener al menos 12 dígitos (57 + 10 dígitos)", "error");
+                return;
+            }
+            
+            if (!/^\d+$/.test(numberInput)) {
+                showStatus("❌ Solo se permiten números (sin espacios, sin +)", "error");
+                return;
+            }
+            
+            if (!numberInput.startsWith('57')) {
+                showStatus("❌ Debe comenzar con 57 (código de Colombia)", "error");
+                return;
+            }
+            
+            // Guardar en múltiples lugares para redundancia
+            WHATSAPP_NUMBER = numberInput;
+            
+            // 1. Guardar en localStorage
+            localStorage.setItem('sb_whatsapp_number', numberInput);
+            
+            // 2. Guardar en la base de datos local
+            window.db.whatsappNumber = numberInput;
+            
+            // 3. Guardar cambios
+            save();
+            
+            // 4. Ocultar alerta de configuración
+            hideWhatsAppAlert();
+            
+            // 5. Mostrar confirmación
+            showStatus("✅ Número de WhatsApp guardado exitosamente", "success");
+            
+            // 6. Actualizar UI
+            updateUI();
+            
+            console.log("WhatsApp configurado:", numberInput);
+        }
+        
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('whatsappStatus');
+            if (statusEl) {
+                statusEl.textContent = message;
+                statusEl.style.display = 'block';
+                statusEl.style.background = type === 'success' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(244, 63, 94, 0.1)';
+                statusEl.style.border = type === 'success' ? '1px solid rgba(34, 197, 94, 0.3)' : '1px solid rgba(244, 63, 94, 0.3)';
+                statusEl.style.color = type === 'success' ? '#22c55e' : '#f43f5e';
+                
+                // Ocultar después de 5 segundos
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        // =============================================
         // FUNCIONES PRINCIPALES
+        // =============================================
         function showTab(tab) {
             ['view-user', 'view-admin-login', 'view-admin-panel', 'view-admin-config'].forEach(v => {
                 document.getElementById(v).classList.add('hidden');
@@ -654,6 +824,12 @@
                 document.getElementById('setPrizeTitle').value = window.db.prize;
                 document.getElementById('setPrizeDesc').value = window.db.desc;
                 document.getElementById('setPrizePrice').value = window.db.price;
+                
+                // Cargar número de WhatsApp en el input
+                const whatsappInput = document.getElementById('whatsappConfig');
+                if (whatsappInput) {
+                    whatsappInput.value = window.db.whatsappNumber || localStorage.getItem('sb_whatsapp_number') || '';
+                }
             }
             
             // Limpiar búsqueda cuando cambias de pestaña
@@ -973,6 +1149,15 @@
         }
         
         function sendWhatsApp() {
+            // =============================================
+            // VERIFICAR QUE WHATSAPP ESTÉ CONFIGURADO
+            // =============================================
+            if (!WHATSAPP_NUMBER || WHATSAPP_NUMBER.length < 12) {
+                alert("⚠️ El número de WhatsApp no está configurado.\n\nPor favor, contacta al administrador o inicia sesión como administrador para configurarlo.");
+                showTab('admin-login');
+                return;
+            }
+            
             // Validar datos
             const nom = document.getElementById('uNombre').value.trim();
             const ciu = document.getElementById('uCiudad').value.trim();
@@ -1179,8 +1364,31 @@
             updateUI();
         }
         
-        // Inicializar UI
-        updateUI();
+        // =============================================
+        // INICIALIZACIÓN DE LA APLICACIÓN
+        // =============================================
+        function initApp() {
+            // Inicializar número de WhatsApp
+            initWhatsAppNumber();
+            
+            // Inicializar UI
+            updateUI();
+            
+            // Verificar si hay sesión activa de admin
+            if (window.db.isAdmin) {
+                showTab('admin-panel');
+            }
+            
+            console.log("Aplicación SB Dinámicas inicializada");
+            console.log("WhatsApp configurado:", WHATSAPP_NUMBER ? "✅ Sí" : "❌ No");
+        }
+        
+        // Inicializar cuando el DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
     </script>
     
     <script type="module">
@@ -1293,6 +1501,13 @@
                                 isAdmin: true
                             };
                             
+                            // Inicializar WhatsApp después de cargar datos
+                            if (firestoreData.whatsappNumber) {
+                                WHATSAPP_NUMBER = firestoreData.whatsappNumber;
+                                localStorage.setItem('sb_whatsapp_number', firestoreData.whatsappNumber);
+                                hideWhatsAppAlert();
+                            }
+                            
                             // Guardar en localStorage
                             localStorage.setItem('bomba_v3_db', JSON.stringify(window.db));
                             
@@ -1330,6 +1545,6 @@
                 showTab('user');
             }
         });
-</script>
+    </script>
 </body>
 </html>
