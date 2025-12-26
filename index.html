@@ -8,378 +8,1328 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #6366f1; --accent: #f43f5e;
-            --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1);
-            --text-main: #f8fafc; --color-libre: rgba(255, 255, 255, 0.03);
-            --color-seleccionado: #6366f1; --color-apartado: #fbbf24; --color-pagado: #22c55e;
+            --primary: #6366f1;
+            --accent: #f43f5e;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --color-libre: rgba(255, 255, 255, 0.03);
+            --color-seleccionado: #6366f1;
+            --color-apartado: #fbbf24;
+            --color-pagado: #22c55e;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: radial-gradient(circle at top right, #0f172a, #020617); color: var(--text-main); min-height: 100vh; padding: 15px; }
-        header, .panel, .admin-card { background: var(--glass); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 20px; margin-bottom: 20px; }
-        h1 { background: linear-gradient(to right, #fbbf24, #22c55e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 2.2rem; font-weight: 800; text-align: center; }
-
-        /* SECCIÓN SELECCIÓN RÁPIDA */
-        .quick-select-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 0 5px; gap: 10px; }
-        .quick-label { font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
-        .quick-group { display: flex; gap: 6px; }
-        .btn-quick { background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); color: #a5b4fc; padding: 8px 14px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .btn-quick:hover { background: var(--primary); color: white; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }
-        .btn-quick-clear { background: rgba(244, 63, 94, 0.1); border-color: rgba(244, 63, 94, 0.2); color: #fb7185; }
-        .btn-quick-clear:hover { background: var(--accent); border-color: var(--accent); }
-
-        /* DASHBOARD ADMIN */
-        .admin-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .stat-card { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; border: 1px solid var(--glass-border); text-align: center; }
-        .stat-card h4 { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; }
-        .stat-card p { font-size: 1.1rem; font-weight: 800; color: #fff; }
-        .stat-recargado { color: #22c55e !important; }
-
-        /* ANIMACIÓN POP */
-        @keyframes popSelection { 0% { transform: scale(1); } 50% { transform: scale(1.3); filter: brightness(1.5); } 100% { transform: scale(1); } }
-        .number-pop { animation: popSelection 0.5s ease-out; }
-
-        .numbers-container { height: 400px; overflow-y: auto; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 18px; border: 1px solid var(--glass-border); }
-        .numbers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px; }
-        .number-item { aspect-ratio: 1; background: var(--color-libre); border: 1px solid var(--glass-border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 0.75rem; color: #94a3b8; }
-        .number-item.selected { background: var(--color-seleccionado); color: white; box-shadow: 0 0 12px var(--color-seleccionado); border: none; }
-        .number-item.apartado { background: var(--color-apartado); color: #000; border: none; }
-        .number-item.pagado { background: var(--color-pagado); color: #fff; border: none; cursor: not-allowed; }
         
-        input { background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; color: white; width: 100%; outline: none; margin-bottom: 10px; }
-        .btn { padding: 12px 20px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-success { background: #22c55e; color: white; width: 100%; font-size: 1.1rem; }
-        .hidden { display: none !important; }
-        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.65rem; font-weight: 800; }
-        .bg-wait { background: var(--color-apartado); color: #000; }
-        .bg-paid { background: var(--color-pagado); color: #fff; }
-        .admin-table-container { overflow-x: auto; margin-top: 10px; max-height: 400px; overflow-y: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border); }
-        .progress-bar-bg { background: rgba(0,0,0,0.4); height: 18px; border-radius: 10px; overflow: hidden; position: relative; margin: 10px 0; }
-        .progress-bar-fill { background: linear-gradient(90deg, #fbbf24, #22c55e); height: 100%; width: 0%; transition: 1s; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        
+        body {
+            background: radial-gradient(circle at top right, #0f172a, #020617);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 15px;
+        }
+        
+        .glass-effect {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        header, .panel, .admin-card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            background: linear-gradient(to right, #fbbf24, #22c55e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.2rem;
+            font-weight: 800;
+            text-align: center;
+        }
+        
+        /* BUSCADOR RÁPIDO DE NÚMEROS */
+        .quick-search-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 0 5px;
+        }
+        
+        .search-input-group {
+            flex: 1;
+            position: relative;
+        }
+        
+        .search-input {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            padding: 10px 40px 10px 12px;
+            border-radius: 12px;
+            color: white;
+            width: 100%;
+            outline: none;
+            font-size: 0.9rem;
+        }
+        
+        .search-input::placeholder {
+            color: #94a3b8;
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+        
+        .search-clear-btn {
+            background: rgba(244, 63, 94, 0.1);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+            color: #fb7185;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .search-clear-btn:hover {
+            background: var(--accent);
+            color: white;
+        }
+        
+        /* SECCIÓN SELECCIÓN RÁPIDA */
+        .quick-select-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 0 5px;
+            gap: 10px;
+        }
+        
+        .quick-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .quick-group {
+            display: flex;
+            gap: 6px;
+        }
+        
+        .btn-quick {
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #a5b4fc;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .btn-quick:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+        
+        .btn-quick-clear {
+            background: rgba(244, 63, 94, 0.1);
+            border-color: rgba(244, 63, 94, 0.2);
+            color: #fb7185;
+        }
+        
+        .btn-quick-clear:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        /* DASHBOARD ADMIN */
+        .admin-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-card {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid var(--glass-border);
+            text-align: center;
+        }
+        
+        .stat-card h4 {
+            font-size: 0.65rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card p {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #fff;
+        }
+        
+        .stat-recargado {
+            color: #22c55e !important;
+        }
+        
+        /* ANIMACIÓN POP */
+        @keyframes popSelection {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); filter: brightness(1.5); }
+            100% { transform: scale(1); }
+        }
+        
+        .number-pop {
+            animation: popSelection 0.5s ease-out;
+        }
+        
+        /* CONTENEDOR DE NÚMEROS CON SCROLL */
+        .numbers-container {
+            height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 18px;
+            border: 1px solid var(--glass-border);
+            position: relative;
+        }
+        
+        .numbers-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .numbers-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        
+        .numbers-container::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+        
+        .numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 8px;
+        }
+        
+        .number-item {
+            aspect-ratio: 1;
+            background: var(--color-libre);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            position: relative;
+        }
+        
+        .number-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .number-item.selected {
+            background: var(--color-seleccionado);
+            color: white;
+            box-shadow: 0 0 12px var(--color-seleccionado);
+            border: none;
+            transform: scale(1.05);
+        }
+        
+        .number-item.apartado {
+            background: var(--color-apartado);
+            color: #000;
+            border: none;
+            cursor: not-allowed;
+        }
+        
+        .number-item.pagado {
+            background: var(--color-pagado);
+            color: #fff;
+            border: none;
+            cursor: not-allowed;
+        }
+        
+        .number-item.highlighted {
+            box-shadow: 0 0 0 2px #f43f5e;
+            z-index: 10;
+        }
+        
+        .number-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #f43f5e;
+            color: white;
+            font-size: 0.5rem;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: 800;
+        }
+        
+        /* FORMULARIOS Y BOTONES */
+        input {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            padding: 12px;
+            border-radius: 12px;
+            color: white;
+            width: 100%;
+            outline: none;
+            margin-bottom: 10px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-success {
+            background: #22c55e;
+            color: white;
+            width: 100%;
+            font-size: 1.1rem;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 800;
+        }
+        
+        .bg-wait {
+            background: var(--color-apartado);
+            color: #000;
+        }
+        
+        .bg-paid {
+            background: var(--color-pagado);
+            color: #fff;
+        }
+        
+        /* TABLAS ADMIN */
+        .admin-table-container {
+            overflow-x: auto;
+            margin-top: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        /* BARRA DE PROGRESO */
+        .progress-bar-bg {
+            background: rgba(0, 0, 0, 0.4);
+            height: 18px;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            margin: 10px 0;
+        }
+        
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #fbbf24, #22c55e);
+            height: 100%;
+            width: 0%;
+            transition: 1s;
+        }
+        
+        /* Spinner de carga */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* LEGENDAS */
+        .legend-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            font-size: 0.75rem;
+            justify-content: center;
+            opacity: 0.8;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+        }
+        
+        /* MENSAJES DE BUSQUEDA */
+        .search-results-info {
+            text-align: center;
+            padding: 10px;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
-
-<div class="container" style="max-width: 900px; margin: 0 auto;">
-    <header>
-        <h1>SB DINÁMICAS</h1>
-        <div style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
-            <button class="btn btn-primary" onclick="showTab('user')"><i class="fas fa-ticket-alt"></i> Sorteo</button>
-            <button class="btn btn-primary" onclick="showTab('admin-login')"><i class="fas fa-lock"></i> Admin</button>
-        </div>
-    </header>
-
-    <div id="view-user">
-        <div class="panel">
-            <h2 id="displayPrizeTitle">Cargando sorteo...</h2>
-            <img id="displayPrizeImg" style="width:100%; height:250px; object-fit:cover; border-radius:15px; margin:15px 0; display:none;">
-            <p id="displayPrizeDesc" style="color:#94a3b8; font-size: 0.9rem;"></p>
-            <h3 style="color:#fbbf24; margin-top:10px;">Boleto: <span id="displayPrice">$0</span> COP</h3>
-        </div>
-
-        <div class="panel">
-            <div class="quick-select-container">
-                <span class="quick-label"><i class="fas fa-dice"></i> Azar:</span>
-                <div class="quick-group">
-                    <button class="btn-quick" onclick="selectRandom(5)">5</button>
-                    <button class="btn-quick" onclick="selectRandom(10)">10</button>
-                    <button class="btn-quick" onclick="selectRandom(20)">20</button>
-                    <button class="btn-quick btn-quick-clear" onclick="clearSelection()"><i class="fas fa-undo"></i></button>
+    <div class="container" style="max-width: 900px; margin: 0 auto;">
+        <header>
+            <h1>SB DINÁMICAS</h1>
+            <div style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
+                <button class="btn btn-primary" onclick="showTab('user')"><i class="fas fa-ticket-alt"></i> Sorteo</button>
+                <button class="btn btn-primary" onclick="showTab('admin-login')"><i class="fas fa-lock"></i> Admin</button>
+            </div>
+        </header>
+        
+        <!-- VISTA USUARIO -->
+        <div id="view-user">
+            <div class="panel">
+                <h2 id="displayPrizeTitle">Cargando sorteo...</h2>
+                <img id="displayPrizeImg" style="width:100%; height:250px; object-fit:cover; border-radius:15px; margin:15px 0; display:none;">
+                <p id="displayPrizeDesc" style="color:#94a3b8; font-size: 0.9rem;"></p>
+                <h3 style="color:#fbbf24; margin-top:10px;">Boleto: <span id="displayPrice">$0</span> COP</h3>
+            </div>
+            
+            <div class="panel">
+                <!-- BUSCADOR RÁPIDO -->
+                <div class="quick-search-container">
+                    <div class="search-input-group">
+                        <input type="text" 
+                               class="search-input" 
+                               id="numberSearch" 
+                               placeholder="Buscar número (Ej: 001, 123...)"
+                               maxlength="3"
+                               oninput="searchNumbers()">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                    <button class="search-clear-btn" onclick="clearSearch()">
+                        <i class="fas fa-times"></i> Limpiar
+                    </button>
+                </div>
+                
+                <!-- RESULTADOS DE BÚSQUEDA -->
+                <div id="searchResultsInfo" class="search-results-info hidden"></div>
+                
+                <!-- SELECCIÓN RÁPIDA -->
+                <div class="quick-select-container">
+                    <span class="quick-label"><i class="fas fa-dice"></i> Azar:</span>
+                    <div class="quick-group">
+                        <button class="btn-quick" onclick="selectRandom(5)">5</button>
+                        <button class="btn-quick" onclick="selectRandom(10)">10</button>
+                        <button class="btn-quick" onclick="selectRandom(20)">20</button>
+                        <button class="btn-quick btn-quick-clear" onclick="clearSelection()"><i class="fas fa-undo"></i></button>
+                    </div>
+                </div>
+                
+                <!-- CONTENEDOR DE NÚMEROS -->
+                <div class="numbers-container">
+                    <div class="numbers-grid" id="mainGrid"></div>
+                </div>
+                
+                <!-- LEYENDA DE COLORES -->
+                <div class="legend-container">
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: var(--color-libre);"></span>
+                        <span>Libre</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: var(--color-apartado);"></span>
+                        <span>Apartado</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: var(--color-pagado);"></span>
+                        <span>Pagado</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: var(--color-seleccionado);"></span>
+                        <span>Seleccionado</span>
+                    </div>
                 </div>
             </div>
-            <div class="numbers-container"><div class="numbers-grid" id="mainGrid"></div></div>
-            <div style="display:flex; gap:15px; margin-top:15px; font-size:0.75rem; justify-content: center; opacity: 0.8;">
-                <span><span style="display:inline-block; width:10px; height:10px; background:var(--color-libre); margin-right:5px; border-radius:2px;"></span>Libre</span>
-                <span><span style="display:inline-block; width:10px; height:10px; background:var(--color-apartado); margin-right:5px; border-radius:2px;"></span>Apartado</span>
-                <span><span style="display:inline-block; width:10px; height:10px; background:var(--color-pagado); margin-right:5px; border-radius:2px;"></span>Pagado</span>
-            </div>
-        </div>
-
-        <div class="panel">
-            <h3>Tus Datos</h3>
-            <div class="form-user">
-                <input type="text" id="uNombre" placeholder="Nombre completo">
-                <input type="text" id="uCiudad" placeholder="Ciudad (Ej: Cali)">
-                <input type="tel" id="uCelular" placeholder="Celular (Ej: 300...)">
-            </div>
-            <div id="selectionSummary" style="margin:20px 0; font-weight:800; color:#fbbf24; text-align:center; min-height: 40px;"></div>
-            <button class="btn btn-success" onclick="sendWhatsApp()"><i class="fab fa-whatsapp"></i> APARTAR POR WHATSAPP</button>
-        </div>
-    </div>
-
-    <div id="view-admin-login" class="hidden">
-        <div class="admin-card" style="max-width:350px; margin: 40px auto;">
-            <h2 style="text-align:center;">Acceso Admin</h2>
-            <input type="email" id="adminEmail" placeholder="Correo" style="margin-top:20px;">
-            <input type="password" id="adminPass" placeholder="Contraseña" style="margin:15px 0;">
-            <button class="btn btn-primary" style="width:100%" id="btnLoginFirebase">Entrar</button>
-        </div>
-    </div>
-
-    <div id="view-admin-panel" class="hidden">
-        <div class="admin-stats">
-            <div class="stat-card">
-                <h4>Confirmado</h4>
-                <p id="statRecaudado" class="stat-recargado">$0</p>
-            </div>
-            <div class="stat-card">
-                <h4>Por Cobrar</h4>
-                <p id="statPendiente">$0</p>
-            </div>
-        </div>
-
-        <div class="panel">
-            <h3>Gestión de Ventas</h3>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" id="progFill"></div></div>
-            <div id="progText" style="text-align:center; font-size:0.75rem; margin-bottom:15px;"></div>
             
-            <input type="text" id="adminSearch" placeholder="🔍 Buscar por número, nombre o ciudad..." oninput="updateUI()">
-
-            <div class="admin-table-container">
-                <table>
-                    <thead><tr><th>Núm</th><th>Participante</th><th>Estado</th><th>Acciones</th></tr></thead>
-                    <tbody id="salesTable"></tbody>
-                </table>
+            <!-- FORMULARIO DE USUARIO -->
+            <div class="panel">
+                <h3>Tus Datos</h3>
+                <div class="form-user">
+                    <input type="text" id="uNombre" placeholder="Nombre completo" required>
+                    <input type="text" id="uCiudad" placeholder="Ciudad (Ej: Cali)" required>
+                    <input type="tel" id="uCelular" placeholder="Celular (Ej: 3001234567)" required pattern="[0-9]{10}">
+                </div>
+                <div id="selectionSummary" style="margin:20px 0; font-weight:800; color:#fbbf24; text-align:center; min-height: 40px;"></div>
+                <button class="btn btn-success" onclick="sendWhatsApp()" id="btnWhatsApp">
+                    <i class="fab fa-whatsapp"></i> APARTAR POR WHATSAPP
+                </button>
             </div>
-            
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:20px;">
-                <button class="btn" style="background:rgba(255,255,255,0.1); color:white;" onclick="showTab('admin-config')">Configurar Sorteo</button>
-                <button class="btn" style="background:#475569; color:white;" onclick="clearAllData()">Resetear Todo</button>
-            </div>
-            <button class="btn" style="width:100%; margin-top:10px; background:none; color:#94a3b8;" id="btnLogout">Cerrar Sesión</button>
         </div>
-    </div>
-
-    <div id="view-admin-config" class="hidden">
-        <div class="panel">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3>Configuración del Premio</h3>
-                <button class="btn-quick" onclick="showTab('admin-panel')">Volver</button>
-            </div>
-            <div class="form-user">
-                <input type="text" id="setPrizeTitle" placeholder="Nombre del Premio">
-                <input type="text" id="setPrizeDesc" placeholder="Descripción">
-                <input type="number" id="setPrizePrice" placeholder="Precio por boleto">
-                <input type="file" id="setPrizeFile" accept="image/*" onchange="uploadImg(this)">
-            </div>
-            <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="saveConfig()">Guardar Cambios</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    window.db = JSON.parse(localStorage.getItem('bomba_v3_db')) || {
-        prize: "Cargando...", desc: "", price: 20000, img: "", soldNumbers: {}
-    };
-
-    let selected = [];
-    const WHATSAPP_NUMBER = "573028115711"; 
-
-    function showTab(tab) {
-        ['view-user', 'view-admin-login', 'view-admin-panel', 'view-admin-config'].forEach(v => {
-            document.getElementById(v).classList.add('hidden');
-        });
-        document.getElementById('view-' + tab).classList.remove('hidden');
-    }
-
-    function initGrid() {
-        const grid = document.getElementById('mainGrid');
-        grid.innerHTML = '';
-        for(let i=0; i<1000; i++) {
-            const n = i.toString().padStart(3, '0');
-            const div = document.createElement('div');
-            let estado = '';
-            if(window.db.soldNumbers[n]) {
-                estado = window.db.soldNumbers[n].pagado ? ' pagado' : ' apartado';
-            }
-            div.className = 'number-item' + estado + (selected.includes(n) ? ' selected' : '');
-            div.id = `num-${n}`;
-            div.textContent = n;
-            div.onclick = () => toggleNumber(n);
-            grid.appendChild(div);
-        }
-    }
-
-    function toggleNumber(n) {
-        if(window.db.soldNumbers[n] && window.db.soldNumbers[n].pagado) return;
-        const idx = selected.indexOf(n);
-        if(idx > -1) selected.splice(idx, 1);
-        else if(selected.length < 20) selected.push(n);
-        updateUI();
-    }
-
-    function selectRandom(qty) {
-        let libres = [];
-        for(let i=0; i<1000; i++) {
-            const n = i.toString().padStart(3, '0');
-            if(!window.db.soldNumbers[n] && !selected.includes(n)) libres.push(n);
-        }
-        if(selected.length >= 20) return alert("Máximo 20 números permitidos");
-        libres.sort(() => Math.random() - 0.5);
-        const espacio = 20 - selected.length;
-        const finalQty = Math.min(qty, espacio, libres.length);
-        for(let i=0; i<finalQty; i++) {
-            const num = libres[i];
-            setTimeout(() => {
-                selected.push(num);
-                updateUI();
-                const el = document.getElementById(`num-${num}`);
-                if(el) el.classList.add('number-pop');
-            }, i * 80);
-        }
-    }
-
-    function clearSelection() { selected = []; updateUI(); }
-
-    function updateUI() {
-        document.getElementById('displayPrizeTitle').textContent = window.db.prize;
-        document.getElementById('displayPrizeDesc').textContent = window.db.desc;
-        document.getElementById('displayPrice').textContent = new Intl.NumberFormat('es-CO').format(window.db.price);
         
-        const imgEl = document.getElementById('displayPrizeImg');
-        if(window.db.img) { imgEl.src = window.db.img; imgEl.style.display = 'block'; }
-        else { imgEl.style.display = 'none'; }
-
-        initGrid();
-
-        document.getElementById('selectionSummary').innerHTML = selected.length ? 
-            `Seleccionados (${selected.length}): ${selected.join(', ')}<br>Total: $${new Intl.NumberFormat('es-CO').format(selected.length * window.db.price)}` : "";
-
-        // ESTADÍSTICAS ADMIN
-        let totalRecaudado = 0;
-        let totalPendiente = 0;
-        let soldCount = Object.keys(window.db.soldNumbers).length;
-
-        const table = document.getElementById('salesTable');
-        const searchTerm = document.getElementById('adminSearch').value.toLowerCase();
-        table.innerHTML = '';
-
-        Object.keys(window.db.soldNumbers).sort().forEach(n => {
+        <!-- VISTA LOGIN ADMIN -->
+        <div id="view-admin-login" class="hidden">
+            <div class="admin-card" style="max-width:350px; margin: 40px auto;">
+                <h2 style="text-align:center;">Acceso Admin</h2>
+                <input type="email" id="adminEmail" placeholder="Correo" style="margin-top:20px;">
+                <input type="password" id="adminPass" placeholder="Contraseña" style="margin:15px 0;">
+                <button class="btn btn-primary" style="width:100%" id="btnLoginFirebase">
+                    <span id="loginText">Entrar</span>
+                    <span id="loginSpinner" class="spinner hidden"></span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- PANEL ADMIN -->
+        <div id="view-admin-panel" class="hidden">
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <h4>Confirmado</h4>
+                    <p id="statRecaudado" class="stat-recargado">$0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Por Cobrar</h4>
+                    <p id="statPendiente">$0</p>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h3>Gestión de Ventas</h3>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progFill"></div>
+                </div>
+                <div id="progText" style="text-align:center; font-size:0.75rem; margin-bottom:15px;"></div>
+                
+                <input type="text" id="adminSearch" placeholder="🔍 Buscar por número, nombre o ciudad..." oninput="updateUI()">
+                
+                <div class="admin-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Núm</th>
+                                <th>Participante</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesTable"></tbody>
+                    </table>
+                </div>
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:20px;">
+                    <button class="btn" style="background:rgba(255,255,255,0.1); color:white;" onclick="showTab('admin-config')">Configurar Sorteo</button>
+                    <button class="btn" style="background:#475569; color:white;" onclick="clearAllData()">Resetear Todo</button>
+                </div>
+                <button class="btn" style="width:100%; margin-top:10px; background:#3b82f6; color:white;" onclick="forceSync()">
+                    <i class="fas fa-sync-alt"></i> Sincronizar con Firebase
+                </button>
+                <button class="btn" style="width:100%; margin-top:10px; background:none; color:#94a3b8;" id="btnLogout">Cerrar Sesión</button>
+            </div>
+        </div>
+        
+        <!-- CONFIGURACIÓN ADMIN -->
+        <div id="view-admin-config" class="hidden">
+            <div class="panel">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>Configuración del Premio</h3>
+                    <button class="btn-quick" onclick="showTab('admin-panel')">Volver</button>
+                </div>
+                <div class="form-user">
+                    <input type="text" id="setPrizeTitle" placeholder="Nombre del Premio">
+                    <input type="text" id="setPrizeDesc" placeholder="Descripción">
+                    <input type="number" id="setPrizePrice" placeholder="Precio por boleto">
+                    <input type="file" id="setPrizeFile" accept="image/*" onchange="uploadImg(this)">
+                </div>
+                <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="saveConfig()">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // CONSTANTES
+        const WHATSAPP_NUMBER = "573215714548";
+        const TOTAL_NUMBERS = 1000;
+        
+        // INICIALIZACIÓN DE DATOS
+        window.db = JSON.parse(localStorage.getItem('bomba_v3_db')) || {
+            prize: "Sorteo SB Dinámicas",
+            desc: "Participa y gana increíbles premios",
+            price: 20000,
+            img: "",
+            soldNumbers: {},
+            lastSync: null,
+            isAdmin: false
+        };
+        
+        // VARIABLES GLOBALES
+        let selected = [];
+        let isFirebaseReady = false;
+        let unsubscribeFirestore = null;
+        let lastSearchTerm = '';
+        let highlightedNumbers = [];
+        
+        // REFERENCIAS A ELEMENTOS DEL DOM
+        let adminPanelRef = null;
+        
+        // FUNCIONES PRINCIPALES
+        function showTab(tab) {
+            ['view-user', 'view-admin-login', 'view-admin-panel', 'view-admin-config'].forEach(v => {
+                document.getElementById(v).classList.add('hidden');
+            });
+            document.getElementById('view-' + tab).classList.remove('hidden');
+            
+            // Cargar datos de configuración cuando se muestre el panel admin
+            if (tab === 'admin-config' && window.db.isAdmin) {
+                document.getElementById('setPrizeTitle').value = window.db.prize;
+                document.getElementById('setPrizeDesc').value = window.db.desc;
+                document.getElementById('setPrizePrice').value = window.db.price;
+            }
+            
+            // Limpiar búsqueda cuando cambias de pestaña
+            if (tab === 'user') {
+                clearSearch();
+            }
+        }
+        
+        function searchNumbers() {
+            const searchTerm = document.getElementById('numberSearch').value.trim();
+            const resultsInfo = document.getElementById('searchResultsInfo');
+            
+            // Si no hay término de búsqueda, mostrar todos los números
+            if (!searchTerm) {
+                clearSearch();
+                return;
+            }
+            
+            // Validar que sea un número
+            if (!/^\d+$/.test(searchTerm)) {
+                resultsInfo.innerHTML = "Ingresa solo números (0-9)";
+                resultsInfo.classList.remove('hidden');
+                return;
+            }
+            
+            lastSearchTerm = searchTerm;
+            
+            // Buscar números que coincidan
+            highlightedNumbers = [];
+            let count = 0;
+            
+            for (let i = 0; i < TOTAL_NUMBERS; i++) {
+                const num = i.toString().padStart(3, '0');
+                const element = document.getElementById(`num-${num}`);
+                
+                if (element) {
+                    if (num.includes(searchTerm)) {
+                        element.classList.add('highlighted');
+                        highlightedNumbers.push(num);
+                        count++;
+                        
+                        // Desplazar a la vista si es el primer resultado
+                        if (count === 1) {
+                            setTimeout(() => {
+                                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 100);
+                        }
+                    } else {
+                        element.classList.remove('highlighted');
+                    }
+                }
+            }
+            
+            // Mostrar información de resultados
+            if (count > 0) {
+                resultsInfo.innerHTML = `Encontrados ${count} número(s) que contienen "${searchTerm}"`;
+                resultsInfo.classList.remove('hidden');
+            } else {
+                resultsInfo.innerHTML = `No se encontraron números que contengan "${searchTerm}"`;
+                resultsInfo.classList.remove('hidden');
+            }
+        }
+        
+        function clearSearch() {
+            document.getElementById('numberSearch').value = '';
+            lastSearchTerm = '';
+            highlightedNumbers.forEach(num => {
+                const element = document.getElementById(`num-${num}`);
+                if (element) {
+                    element.classList.remove('highlighted');
+                }
+            });
+            highlightedNumbers = [];
+            document.getElementById('searchResultsInfo').classList.add('hidden');
+            initGrid(); // Redibujar la cuadrícula normal
+        }
+        
+        function initGrid() {
+            const grid = document.getElementById('mainGrid');
+            grid.innerHTML = '';
+            
+            for(let i = 0; i < TOTAL_NUMBERS; i++) {
+                const n = i.toString().padStart(3, '0');
+                const div = document.createElement('div');
+                
+                // Determinar estado del número
+                let estado = '';
+                if(window.db.soldNumbers[n]) {
+                    estado = window.db.soldNumbers[n].pagado ? ' pagado' : ' apartado';
+                }
+                
+                // Verificar si está seleccionado actualmente
+                const isSelected = selected.includes(n);
+                
+                // Verificar si está resaltado por búsqueda
+                const isHighlighted = highlightedNumbers.includes(n);
+                
+                div.className = 'number-item' + estado + (isSelected ? ' selected' : '') + (isHighlighted ? ' highlighted' : '');
+                div.id = `num-${n}`;
+                div.textContent = n;
+                div.onclick = () => toggleNumber(n);
+                
+                // Agregar badge si está apartado o pagado
+                if (window.db.soldNumbers[n]) {
+                    const badge = document.createElement('span');
+                    badge.className = 'number-badge';
+                    badge.textContent = window.db.soldNumbers[n].pagado ? 'P' : 'A';
+                    div.appendChild(badge);
+                }
+                
+                grid.appendChild(div);
+            }
+        }
+        
+        function toggleNumber(n) {
+            // No permitir seleccionar números ya pagados
+            if(window.db.soldNumbers[n] && window.db.soldNumbers[n].pagado) {
+                alert("Este número ya está pagado y no puede ser seleccionado.");
+                return;
+            }
+            
+            const idx = selected.indexOf(n);
+            if(idx > -1) {
+                // Deseleccionar
+                selected.splice(idx, 1);
+            } else {
+                // Seleccionar si no excede el límite
+                if(selected.length >= 20) {
+                    alert("Máximo 20 números permitidos por transacción.");
+                    return;
+                }
+                selected.push(n);
+            }
+            updateUI();
+        }
+        
+        function selectRandom(qty) {
+            // Verificar límite
+            if(selected.length >= 20) {
+                alert("Máximo 20 números permitidos.");
+                return;
+            }
+            
+            // Encontrar números libres
+            let libres = [];
+            for(let i = 0; i < TOTAL_NUMBERS; i++) {
+                const n = i.toString().padStart(3, '0');
+                if(!window.db.soldNumbers[n] && !selected.includes(n)) {
+                    libres.push(n);
+                }
+            }
+            
+            if(libres.length === 0) {
+                alert("¡Todos los números están ocupados!");
+                return;
+            }
+            
+            // Calcular cuántos números podemos agregar
+            const espacio = 20 - selected.length;
+            const finalQty = Math.min(qty, espacio, libres.length);
+            
+            // Mezclar y seleccionar
+            libres.sort(() => Math.random() - 0.5);
+            
+            for(let i = 0; i < finalQty; i++) {
+                const num = libres[i];
+                setTimeout(() => {
+                    if(!selected.includes(num)) {
+                        selected.push(num);
+                        updateUI();
+                        const el = document.getElementById(`num-${num}`);
+                        if(el) el.classList.add('number-pop');
+                    }
+                }, i * 80);
+            }
+        }
+        
+        function clearSelection() {
+            selected = [];
+            updateUI();
+        }
+        
+        function updateUI() {
+            // Obtener referencia al panel admin una sola vez
+            if (!adminPanelRef) {
+                adminPanelRef = document.getElementById('view-admin-panel');
+            }
+            
+            // Actualizar información del premio
+            document.getElementById('displayPrizeTitle').textContent = window.db.prize || "Sorteo";
+            document.getElementById('displayPrizeDesc').textContent = window.db.desc || "";
+            document.getElementById('displayPrice').textContent = new Intl.NumberFormat('es-CO').format(window.db.price || 0);
+            
+            // Actualizar imagen del premio
+            const imgEl = document.getElementById('displayPrizeImg');
+            if(window.db.img) {
+                imgEl.src = window.db.img;
+                imgEl.style.display = 'block';
+            } else {
+                imgEl.style.display = 'none';
+            }
+            
+            // Actualizar grid de números (solo si no hay búsqueda activa)
+            if (!lastSearchTerm) {
+                initGrid();
+            } else {
+                // Si hay búsqueda, solo actualizar los estados
+                for(let i = 0; i < TOTAL_NUMBERS; i++) {
+                    const n = i.toString().padStart(3, '0');
+                    const element = document.getElementById(`num-${n}`);
+                    if (element) {
+                        // Actualizar clases de estado
+                        element.classList.remove('selected', 'apartado', 'pagado');
+                        
+                        if (selected.includes(n)) {
+                            element.classList.add('selected');
+                        } else if (window.db.soldNumbers[n]) {
+                            element.classList.add(window.db.soldNumbers[n].pagado ? 'pagado' : 'apartado');
+                        }
+                    }
+                }
+            }
+            
+            // Actualizar resumen de selección
+            const summaryEl = document.getElementById('selectionSummary');
+            if(selected.length > 0) {
+                const total = selected.length * window.db.price;
+                summaryEl.innerHTML = `
+                    <strong>Números seleccionados (${selected.length}):</strong><br>
+                    ${selected.join(', ')}<br>
+                    <strong>Total a pagar:</strong> $${new Intl.NumberFormat('es-CO').format(total)} COP
+                `;
+            } else {
+                summaryEl.innerHTML = "No hay números seleccionados.";
+            }
+            
+            // ESTADÍSTICAS ADMIN (solo si está en panel admin)
+            if(adminPanelRef && !adminPanelRef.classList.contains('hidden')) {
+                let totalRecaudado = 0;
+                let totalPendiente = 0;
+                let soldCount = Object.keys(window.db.soldNumbers).length;
+                
+                const table = document.getElementById('salesTable');
+                const searchTerm = document.getElementById('adminSearch')?.value?.toLowerCase() || '';
+                table.innerHTML = '';
+                
+                // Procesar números vendidos
+                Object.keys(window.db.soldNumbers).sort().forEach(n => {
+                    const u = window.db.soldNumbers[n];
+                    const match = n.includes(searchTerm) || 
+                                 u.nombre.toLowerCase().includes(searchTerm) || 
+                                 u.ciudad.toLowerCase().includes(searchTerm);
+                    
+                    if(u.pagado) {
+                        totalRecaudado += Number(window.db.price);
+                    } else {
+                        totalPendiente += Number(window.db.price);
+                    }
+                    
+                    if(match) {
+                        table.innerHTML += `<tr>
+                            <td><b>${n}</b></td>
+                            <td>${u.nombre}<br>
+                                <small style="color:#94a3b8">${u.ciudad} • ${u.celular}</small><br>
+                                <small style="color:#64748b; font-size:0.7rem">${new Date(u.fecha).toLocaleDateString()}</small>
+                            </td>
+                            <td><span class="badge ${u.pagado?'bg-paid':'bg-wait'}">${u.pagado?'PAGADO':'ESPERANDO PAGO'}</span></td>
+                            <td>
+                                <div style="display:flex; gap:8px;">
+                                    <button title="Enviar mensaje" onclick="sendWhatsAppCobro('${n}')" style="color:#fbbf24; background:none; border:none; cursor:pointer;"><i class="fab fa-whatsapp"></i></button>
+                                    <button title="${u.pagado?'Marcar como pendiente':'Marcar como pagado'}" onclick="togglePaid('${n}')" style="color:#22c55e; background:none; border:none; cursor:pointer;"><i class="fas fa-check-circle"></i></button>
+                                    <button title="Eliminar reserva" onclick="deleteEntry('${n}')" style="color:#f43f5e; background:none; border:none; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>`;
+                    }
+                });
+                
+                // Actualizar estadísticas
+                document.getElementById('statRecaudado').textContent = `$${new Intl.NumberFormat('es-CO').format(totalRecaudado)}`;
+                document.getElementById('statPendiente').textContent = `$${new Intl.NumberFormat('es-CO').format(totalPendiente)}`;
+                document.getElementById('progFill').style.width = (soldCount/10) + "%";
+                document.getElementById('progText').textContent = `${soldCount}/1000 Números reservados (${Math.round((soldCount/1000)*100)}%)`;
+            }
+        }
+        
+        function sendWhatsAppCobro(n) {
             const u = window.db.soldNumbers[n];
-            const match = n.includes(searchTerm) || u.nombre.toLowerCase().includes(searchTerm) || u.ciudad.toLowerCase().includes(searchTerm);
+            let msg = "";
             
-            if(u.pagado) totalRecaudado += Number(window.db.price);
-            else totalPendiente += Number(window.db.price);
-
-            if(match) {
-                table.innerHTML += `<tr>
-                    <td><b>${n}</b></td>
-                    <td>${u.nombre}<br><small style="color:#94a3b8">${u.ciudad}</small></td>
-                    <td><span class="badge ${u.pagado?'bg-paid':'bg-wait'}">${u.pagado?'PAGO':'ESPERA'}</span></td>
-                    <td>
-                        <div style="display:flex; gap:8px;">
-                            <button title="Enviar Recibo/Cobro" onclick="sendWhatsAppCobro('${n}')" style="color:#fbbf24; background:none; border:none; cursor:pointer;"><i class="fab fa-whatsapp"></i></button>
-                            <button title="Cambiar Estado" onclick="togglePaid('${n}')" style="color:#22c55e; background:none; border:none; cursor:pointer;"><i class="fas fa-check-circle"></i></button>
-                            <button title="Eliminar" onclick="deleteEntry('${n}')" style="color:#f43f5e; background:none; border:none; cursor:pointer;"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>`;
+            if(u.pagado) {
+                msg = encodeURIComponent(
+                    `*RECIBO DE PAGO SB DINÁMICAS* 🎟️\n\n` +
+                    `Hola *${u.nombre}*,\n\n` +
+                    `✅ Confirmamos tu pago por el número *${n}*.\n` +
+                    `💰 Valor pagado: $${new Intl.NumberFormat('es-CO').format(window.db.price)} COP\n` +
+                    `📅 Fecha: ${new Date().toLocaleDateString()}\n\n` +
+                    `¡Mucha suerte en el sorteo! 🍀\n\n` +
+                    `_Atentamente, SB Dinámicas_`
+                );
+            } else {
+                msg = encodeURIComponent(
+                    `*RECORDATORIO DE PAGO SB DINÁMICAS* ⏳\n\n` +
+                    `Hola *${u.nombre}*,\n\n` +
+                    `Te escribimos para recordarte que tienes el número *${n}* reservado.\n` +
+                    `💰 Valor a pagar: $${new Intl.NumberFormat('es-CO').format(window.db.price)} COP\n\n` +
+                    `⚠️ *IMPORTANTE:* Tu reserva vencerá en 24 horas.\n\n` +
+                    `Para confirmar tu participación, realiza el pago a:\n` +
+                    `• Bancolombia: 123-456789-0\n` +
+                    `• Nequi: 3001234567\n` +
+                    `• Daviplata: 3001234567\n\n` +
+                    `¿Ya realizaste el pago? Confírmalo respondiendo este mensaje.\n\n` +
+                    `_Atentamente, SB Dinámicas_`
+                );
+            }
+            window.open(`https://wa.me/57${u.celular}?text=${msg}`, '_blank');
+        }
+        
+        function sendWhatsApp() {
+            // Validar datos
+            const nom = document.getElementById('uNombre').value.trim();
+            const ciu = document.getElementById('uCiudad').value.trim();
+            let cel = document.getElementById('uCelular').value.trim();
+            
+            // Validar campos obligatorios
+            if(!nom || !ciu || !cel) {
+                alert("Por favor completa todos los datos obligatorios.");
+                return;
+            }
+            
+            // Validar selección de números
+            if(selected.length === 0) {
+                alert("Por favor selecciona al menos un número.");
+                return;
+            }
+            
+            // Limpiar y validar celular (solo números)
+            cel = cel.replace(/\D/g, '');
+            if(cel.length < 10) {
+                alert("Por favor ingresa un número de celular válido (10 dígitos).");
+                return;
+            }
+            
+            // Validar formato colombiano (comienza con 3)
+            if(!cel.startsWith('3')) {
+                alert("El número de celular debe comenzar con 3 (formato colombiano).");
+                return;
+            }
+            
+            // Prevenir inyección HTML en nombres
+            const cleanNombre = nom.replace(/[<>]/g, '');
+            const cleanCiudad = ciu.replace(/[<>]/g, '');
+            
+            // Verificar que los números estén disponibles
+            const numerosNoDisponibles = selected.filter(n => 
+                window.db.soldNumbers[n] && window.db.soldNumbers[n].pagado
+            );
+            
+            if(numerosNoDisponibles.length > 0) {
+                alert(`Los siguientes números ya están pagados: ${numerosNoDisponibles.join(', ')}\nPor favor selecciona otros números.`);
+                return;
+            }
+            
+            // Deshabilitar botón temporalmente
+            const btn = document.getElementById('btnWhatsApp');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner"></span> PROCESANDO...';
+            btn.disabled = true;
+            
+            // Guardar cada número seleccionado
+            const fecha = new Date().toISOString();
+            selected.forEach(n => {
+                if(!window.db.soldNumbers[n]) {
+                    window.db.soldNumbers[n] = { 
+                        nombre: cleanNombre, 
+                        ciudad: cleanCiudad, 
+                        celular: cel, 
+                        pagado: false,
+                        fecha: fecha
+                    };
+                }
+            });
+            
+            // Guardar cambios
+            save();
+            
+            // Mostrar mensaje de confirmación ANTES de limpiar
+            alert(`¡Reserva exitosa! Se han apartado ${selected.length} número(s).\n\nSe ha abierto WhatsApp para que completes el proceso.`);
+            
+            // Preparar mensaje para WhatsApp
+            const total = selected.length * window.db.price;
+            const msg = encodeURIComponent(
+                `*NUEVA RESERVA - SB DINÁMICAS* 🎟️\n\n` +
+                `👤 *Cliente:* ${cleanNombre}\n` +
+                `📍 *Ciudad:* ${cleanCiudad}\n` +
+                `📱 *Celular:* ${cel}\n\n` +
+                `🔢 *Números reservados (${selected.length}):*\n${selected.join(', ')}\n\n` +
+                `💰 *Total a pagar:* $${total.toLocaleString('es-CO')} COP\n` +
+                `🎯 *Premio:* ${window.db.prize}\n\n` +
+                `⏰ *La reserva es válida por 24 horas*\n\n` +
+                `_Este mensaje fue generado automáticamente desde la plataforma_`
+            );
+            
+            // Abrir WhatsApp después de un breve retraso
+            setTimeout(() => {
+                window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
+                
+                // Restaurar botón
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                
+                // Limpiar formulario y selección
+                selected = [];
+                document.getElementById('uNombre').value = '';
+                document.getElementById('uCiudad').value = '';
+                document.getElementById('uCelular').value = '';
+                
+                // Actualizar UI
+                updateUI();
+            }, 500);
+        }
+        
+        function uploadImg(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => { 
+                    window.db.img = e.target.result; 
+                    save(); 
+                    alert("Imagen cargada exitosamente.");
+                };
+                reader.onerror = () => alert("Error al cargar la imagen.");
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        function togglePaid(n) {
+            if(window.db.soldNumbers[n]) {
+                window.db.soldNumbers[n].pagado = !window.db.soldNumbers[n].pagado;
+                window.db.soldNumbers[n].fechaActualizacion = new Date().toISOString();
+                save();
+                alert(`Número ${n} ${window.db.soldNumbers[n].pagado ? 'marcado como PAGADO' : 'marcado como PENDIENTE'}.`);
+            }
+        }
+        
+        function deleteEntry(n) {
+            if(confirm(`¿Estás seguro de liberar el número ${n}?\n\nEsta acción eliminará la reserva de ${window.db.soldNumbers[n]?.nombre || 'este cliente'}.`)) {
+                delete window.db.soldNumbers[n];
+                save();
+                alert(`Número ${n} liberado exitosamente.`);
+            }
+        }
+        
+        function saveConfig() {
+            const title = document.getElementById('setPrizeTitle').value.trim();
+            const desc = document.getElementById('setPrizeDesc').value.trim();
+            const price = parseInt(document.getElementById('setPrizePrice').value);
+            
+            if(!title || !desc || !price || price <= 0) {
+                alert("Por favor completa todos los campos con valores válidos.");
+                return;
+            }
+            
+            window.db.prize = title;
+            window.db.desc = desc;
+            window.db.price = price;
+            window.db.lastUpdate = new Date().toISOString();
+            
+            save();
+            alert("Configuración guardada exitosamente.");
+            showTab('admin-panel');
+        }
+        
+        function clearAllData() {
+            if(confirm("⚠️ ¡ADVERTENCIA!\n\n¿Estás seguro de resetear TODOS los datos?\n\nEsta acción:\n• Eliminará todas las reservas\n• No se puede deshacer\n\nEscribe 'RESET' para confirmar:")) {
+                const confirmacion = prompt("Escribe 'RESET' para confirmar:");
+                if(confirmacion === 'RESET') {
+                    window.db.soldNumbers = {};
+                    save();
+                    alert("Todos los datos han sido reseteados.");
+                } else {
+                    alert("Reset cancelado.");
+                }
+            }
+        }
+        
+        function forceSync() {
+            if (window.saveToFirestore && window.db.isAdmin) {
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<span class="spinner"></span> SINCRONIZANDO...';
+                btn.disabled = true;
+                
+                window.saveToFirestore()
+                    .then(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        alert("✅ Sincronización exitosa con Firebase.");
+                    })
+                    .catch(err => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        console.error("Error sincronizando:", err);
+                        alert("❌ Error sincronizando con Firebase:\n" + err.message);
+                    });
+            } else {
+                alert("Debes iniciar sesión como administrador para sincronizar.");
+            }
+        }
+        
+        function save() {
+            // Guardar en localStorage
+            localStorage.setItem('bomba_v3_db', JSON.stringify(window.db));
+            
+            // Guardar en Firebase si está disponible
+            if (window.saveToFirestore && window.db.isAdmin && isFirebaseReady) {
+                window.saveToFirestore().catch(err => {
+                    console.error("Error guardando en Firebase:", err);
+                    // Los datos ya están guardados en localStorage, así que no es crítico
+                });
+            }
+            
+            // Actualizar UI
+            updateUI();
+        }
+        
+        // Inicializar UI
+        updateUI();
+    </script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8j6OmhdGkyF_Jw0Fz88BG0fWuixnY-EY",
+            authDomain: "sbdinamicas-2025.firebaseapp.com",
+            projectId: "sbdinamicas-2025",
+            storageBucket: "sbdinamicas-2025.firebasestorage.app",
+            messagingSenderId: "465275725018",
+            appId: "1:465275725018:web:9f58c09a23a74a419171e3"
+        };
+        
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+        const auth = getAuth(app);
+        const docRef = doc(firestore, "sorteos", "principal");
+        
+        // Configurar botón de login
+        document.getElementById('btnLoginFirebase').onclick = async () => {
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPass').value;
+            
+            if(!email || !password) {
+                alert("Por favor ingresa correo y contraseña.");
+                return;
+            }
+            
+            const loginBtn = document.getElementById('btnLoginFirebase');
+            const loginText = document.getElementById('loginText');
+            const loginSpinner = document.getElementById('loginSpinner');
+            
+            loginText.textContent = "Iniciando sesión...";
+            loginSpinner.classList.remove('hidden');
+            loginBtn.disabled = true;
+            
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                loginText.textContent = "Entrar";
+                loginSpinner.classList.add('hidden');
+                loginBtn.disabled = false;
+                showTab('admin-panel');
+                alert("✅ Inicio de sesión exitoso.");
+            } catch (err) {
+                loginText.textContent = "Entrar";
+                loginSpinner.classList.add('hidden');
+                loginBtn.disabled = false;
+                
+                let errorMsg = "Error al iniciar sesión: ";
+                switch(err.code) {
+                    case 'auth/invalid-email':
+                        errorMsg += "Correo electrónico inválido.";
+                        break;
+                    case 'auth/user-disabled':
+                        errorMsg += "Esta cuenta ha sido deshabilitada.";
+                        break;
+                    case 'auth/user-not-found':
+                        errorMsg += "No existe una cuenta con este correo.";
+                        break;
+                    case 'auth/wrong-password':
+                        errorMsg += "Contraseña incorrecta.";
+                        break;
+                    default:
+                        errorMsg += err.message;
+                }
+                alert(errorMsg);
+            }
+        };
+        
+        // Configurar logout
+        document.getElementById('btnLogout').onclick = () => {
+            signOut(auth).then(() => {
+                window.db.isAdmin = false;
+                alert("Sesión cerrada exitosamente.");
+                showTab('user');
+            }).catch(err => {
+                alert("Error al cerrar sesión: " + err.message);
+            });
+        };
+        
+        // Manejar estado de autenticación (SÓLO UNA VEZ)
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // Usuario autenticado
+                window.db.isAdmin = true;
+                
+                // Cargar datos de Firebase
+                try {
+                    // Suscribirse a cambios en tiempo real
+                    unsubscribeFirestore = onSnapshot(docRef, (snap) => {
+                        if(snap.exists()) {
+                            const firestoreData = snap.data();
+                            
+                            // Preservar datos locales que no están en Firebase
+                            const localNumbers = window.db.soldNumbers;
+                            
+                            // Fusionar datos
+                            window.db = {
+                                ...window.db,
+                                ...firestoreData,
+                                // Mantener números locales si no están en Firebase
+                                soldNumbers: {
+                                    ...firestoreData.soldNumbers,
+                                    ...localNumbers
+                                },
+                                isAdmin: true
+                            };
+                            
+                            // Guardar en localStorage
+                            localStorage.setItem('bomba_v3_db', JSON.stringify(window.db));
+                            
+                            // Actualizar UI
+                            updateUI();
+                            isFirebaseReady = true;
+                        } else {
+                            // Si no existe el documento, crearlo con datos actuales
+                            window.saveToFirestore = () => setDoc(docRef, window.db);
+                            window.saveToFirestore();
+                        }
+                    });
+                    
+                    // Configurar función para guardar en Firebase
+                    window.saveToFirestore = () => setDoc(docRef, window.db);
+                    
+                } catch (err) {
+                    console.error("Error cargando datos de Firebase:", err);
+                    alert("Error conectando con Firebase. Los cambios se guardarán solo localmente.");
+                    isFirebaseReady = false;
+                }
+                
+            } else {
+                // Usuario no autenticado
+                window.db.isAdmin = false;
+                isFirebaseReady = false;
+                
+                // Limpiar suscripción si existe
+                if (unsubscribeFirestore) {
+                    unsubscribeFirestore();
+                    unsubscribeFirestore = null;
+                }
+                
+                window.saveToFirestore = null;
+                showTab('user');
             }
         });
-
-        document.getElementById('statRecaudado').textContent = `$${new Intl.NumberFormat('es-CO').format(totalRecaudado)}`;
-        document.getElementById('statPendiente').textContent = `$${new Intl.NumberFormat('es-CO').format(totalPendiente)}`;
-        document.getElementById('progFill').style.width = (soldCount/10) + "%";
-        document.getElementById('progText').textContent = `${soldCount}/1000 Reservas`;
-    }
-
-    function sendWhatsAppCobro(n) {
-        const u = window.db.soldNumbers[n];
-        let msg = "";
-        if(u.pagado) {
-            msg = `*RECIBO DE PAGO SB DINÁMICAS* 🎟️%0A%0AHola *${u.nombre}*, confirmamos tu pago por el número *${n}*.%0A¡Mucha suerte en el sorteo! 🍀`;
-        } else {
-            msg = `*RECORDATORIO DE PAGO SB DINÁMICAS* ⏳%0A%0AHola *${u.nombre}*, te escribimos para recordarte que tienes el número *${n}* reservado.%0A💰 Valor: $${new Intl.NumberFormat('es-CO').format(window.db.price)}%0A¿Deseas confirmar tu participación?`;
-        }
-        window.open(`https://wa.me/57${u.celular}?text=${msg}`);
-    }
-
-    function sendWhatsApp() {
-        const nom = document.getElementById('uNombre').value;
-        const ciu = document.getElementById('uCiudad').value;
-        const cel = document.getElementById('uCelular').value;
-        if(!nom || !ciu || !cel || !selected.length) return alert("Completa todos los datos");
-
-        selected.forEach(n => {
-            window.db.soldNumbers[n] = { nombre: nom, ciudad: ciu, celular: cel, pagado: false };
-        });
-
-        const msg = `¡Hola! 👋 Vengo de SB DINÁMICAS%0A🔢 *Números:* ${selected.join(', ')}%0A👤 *Cliente:* ${nom}%0A📍 *Ciudad:* ${ciu}%0A💰 *Total:* $${new Intl.NumberFormat('es-CO').format(selected.length * window.db.price)}%0A%0A*Espero datos de pago.*`;
-        
-        save();
-        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`);
-        selected = []; updateUI();
-    }
-
-    function uploadImg(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => { window.db.img = e.target.result; save(); alert("Imagen cargada"); };
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    function togglePaid(n) { window.db.soldNumbers[n].pagado = !window.db.soldNumbers[n].pagado; save(); }
-    function deleteEntry(n) { if(confirm("¿Liberar número?")) { delete window.db.soldNumbers[n]; save(); } }
-    function saveConfig() {
-        window.db.prize = document.getElementById('setPrizeTitle').value;
-        window.db.desc = document.getElementById('setPrizeDesc').value;
-        window.db.price = document.getElementById('setPrizePrice').value;
-        save(); alert("Configuración guardada");
-        showTab('admin-panel');
-    }
-    function clearAllData() { if(confirm("¿Borrar todas las ventas?")) { window.db.soldNumbers = {}; save(); } }
-    function save() { 
-        localStorage.setItem('bomba_v3_db', JSON.stringify(window.db)); 
-        if (window.saveToFirestore) window.saveToFirestore();
-        updateUI();
-    }
-    updateUI();
-</script>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyC8j6OmhdGkyF_Jw0Fz88BG0fWuixnY-EY",
-        authDomain: "sbdinamicas-2025.firebaseapp.com",
-        projectId: "sbdinamicas-2025",
-        storageBucket: "sbdinamicas-2025.firebasestorage.app",
-        messagingSenderId: "465275725018",
-        appId: "1:465275725018:web:9f58c09a23a74a419171e3"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const firestore = getFirestore(app);
-    const auth = getAuth(app);
-    const docRef = doc(firestore, "sorteos", "principal");
-
-    document.getElementById('btnLoginFirebase').onclick = async () => {
-        try {
-            await signInWithEmailAndPassword(auth, document.getElementById('adminEmail').value, document.getElementById('adminPass').value);
-            showTab('admin-panel');
-        } catch (err) { alert("Usuario o clave incorrectos"); }
-    };
-
-    document.getElementById('btnLogout').onclick = () => signOut(auth).then(() => showTab('user'));
-
-    onAuthStateChanged(auth, user => {
-        if (user) {
-            document.getElementById('setPrizeTitle').value = window.db.prize;
-            document.getElementById('setPrizeDesc').value = window.db.desc;
-            document.getElementById('setPrizePrice').value = window.db.price;
-        } else {
-            document.getElementById('view-admin-panel').classList.add('hidden');
-            document.getElementById('view-admin-config').classList.add('hidden');
-        }
-    });
-
-    onSnapshot(docRef, snap => { if(snap.exists()) { window.db = snap.data(); updateUI(); } });
-    window.saveToFirestore = () => setDoc(docRef, window.db);
 </script>
 </body>
 </html>
