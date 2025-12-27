@@ -1409,7 +1409,8 @@
         const app = initializeApp(firebaseConfig);
         const firestore = getFirestore(app);
         const auth = getAuth(app);
-        const docRef = doc(firestore, "sorteos", "principal");
+        const docRef = doc(db, "sorteos", "principal");
+
         
         // Configurar botón de login
         document.getElementById('btnLoginFirebase').onclick = async () => {
