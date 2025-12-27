@@ -1409,7 +1409,7 @@
         const app = initializeApp(firebaseConfig);
         const firestore = getFirestore(app);
         const auth = getAuth(app);
-        const docRef = doc(db, "sorteos", "principal");
+        const docRef = doc(firestore, "sorteos", "principal");
 
         
         // Configurar botón de login
