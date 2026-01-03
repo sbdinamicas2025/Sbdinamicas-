@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,11 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
+        .number-item:active {
+    transform: scale(0.9);
+}
+
         :root {
             --primary: #6366f1;
             --primary-dark: #4f46e5;
@@ -77,26 +79,6 @@
         @keyframes shimmer {
             0% { background-position: -1000px 0; }
             100% { background-position: 1000px 0; }
-        }
-        
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
-        }
-        
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 0 3px var(--accent); }
-            50% { box-shadow: 0 0 0 6px var(--accent); }
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        @keyframes slideInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
         }
         
         /* GLASS EFFECT PREMIUM */
@@ -388,6 +370,11 @@
             animation: pulse 2s infinite;
         }
         
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 3px var(--accent); }
+            50% { box-shadow: 0 0 0 6px var(--accent); }
+        }
+        
         .number-badge {
             position: absolute;
             top: -6px;
@@ -544,7 +531,7 @@
         }
         
         /* FORMULARIOS PREMIUM */
-        input, textarea {
+        input {
             background: rgba(0, 0, 0, 0.4);
             border: 2px solid transparent;
             padding: 15px;
@@ -559,20 +546,14 @@
                       linear-gradient(135deg, var(--glass-border), transparent) border-box;
         }
         
-        input:focus, textarea:focus {
+        input:focus {
             border-color: var(--primary);
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(99, 102, 241, 0.2);
         }
         
-        input::placeholder, textarea::placeholder {
+        input::placeholder {
             color: var(--text-secondary);
-        }
-        
-        textarea {
-            min-height: 100px;
-            resize: vertical;
-            font-family: inherit;
         }
         
         /* LOADING STATES */
@@ -584,6 +565,10 @@
             border-radius: 50%;
             border-top-color: var(--primary);
             animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         
         /* UTILITIES */
@@ -703,263 +688,28 @@
             }
         }
         
+        /* ANIMACIÓN DE ENTRADA */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
         .container {
             max-width: 900px;
             margin: 0 auto;
             animation: slideInUp 0.6s ease-out;
         }
-        
-        /* ESTADO DE CONEXIÓN */
-        .connection-status {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 10px 15px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            animation: fadeIn 0.5s ease-out;
-        }
-        
-        .connection-status.online {
-            background: rgba(34, 197, 94, 0.15);
-            color: #22c55e;
-            border-color: rgba(34, 197, 94, 0.3);
-        }
-        
-        .connection-status.offline {
-            background: rgba(244, 63, 94, 0.15);
-            color: #f43f5e;
-            border-color: rgba(244, 63, 94, 0.3);
-        }
-        
-        .connection-status.syncing {
-            background: rgba(99, 102, 241, 0.15);
-            color: #6366f1;
-            border-color: rgba(99, 102, 241, 0.3);
-        }
-        
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        
-        .status-dot.online {
-            background: #22c55e;
-            box-shadow: 0 0 10px #22c55e;
-        }
-        
-        .status-dot.offline {
-            background: #f43f5e;
-        }
-        
-        .status-dot.syncing {
-            background: #6366f1;
-            animation: pulse 1.5s infinite;
-        }
-        
-        /* VALIDACIONES */
-        .input-valid {
-            border-color: var(--success) !important;
-            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)) padding-box,
-                        linear-gradient(135deg, var(--success), transparent) border-box !important;
-        }
-        
-        .input-invalid {
-            border-color: var(--accent) !important;
-            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)) padding-box,
-                        linear-gradient(135deg, var(--accent), transparent) border-box !important;
-            animation: shake 0.5s ease-in-out;
-        }
-        
-        .validation-message {
-            font-size: 0.8rem;
-            margin-top: -8px;
-            margin-bottom: 12px;
-            padding: 8px 12px;
-            border-radius: 8px;
-            display: none;
-        }
-        
-        .validation-success {
-            background: rgba(34, 197, 94, 0.1);
-            color: #22c55e;
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            display: block;
-        }
-        
-        .validation-error {
-            background: rgba(244, 63, 94, 0.1);
-            color: #f43f5e;
-            border: 1px solid rgba(244, 63, 94, 0.3);
-            display: block;
-        }
-        
-        /* MODAL DE PAGO */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(15px);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.4s ease-out;
-            padding: 20px;
-        }
-        
-        .modal-content {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 30px;
-            max-width: 500px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        .payment-method {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .payment-method:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-3px);
-        }
-        
-        .payment-method.selected {
-            background: rgba(99, 102, 241, 0.2);
-            border-color: var(--primary);
-            box-shadow: 0 5px 20px rgba(99, 102, 241, 0.3);
-        }
-        
-        /* BADGES DE SEGURIDAD */
-        .security-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            margin-left: 8px;
-        }
-        
-        .badge-safe {
-            background: linear-gradient(135deg, var(--success), var(--success-dark));
-            color: white;
-        }
-        
-        .badge-warning {
-            background: linear-gradient(135deg, var(--warning), var(--warning-dark));
-            color: black;
-        }
-        
-        .badge-danger {
-            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-            color: white;
-        }
     </style>
 </head>
 <body>
-    <!-- Indicador de conexión -->
-    <div id="connectionStatus" class="connection-status hidden">
-        <span class="status-dot"></span>
-        <span id="connectionText">Conectando...</span>
-    </div>
-    
     <!-- NOTIFICACIONES -->
     <div id="notification" class="notification hidden"></div>
-    
-    <!-- MODALES -->
-    <div id="whatsappConfirmationModal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <h2 style="color: white; margin-bottom: 20px; text-align: center;">
-                <i class="fab fa-whatsapp"></i> Confirmar Reserva
-            </h2>
-            <div id="whatsappDetails"></div>
-            <button class="btn btn-primary" onclick="sendWhatsAppReservation()" style="width: 100%; margin-top: 20px;">
-                <i class="fab fa-whatsapp"></i> Enviar por WhatsApp
-            </button>
-            <button class="btn" onclick="closeModal('whatsappConfirmationModal')" 
-                    style="width: 100%; margin-top: 10px; background: none; color: var(--text-secondary);">
-                Cancelar
-            </button>
-        </div>
-    </div>
-    
-    <div id="paymentModal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <h2 style="color: white; margin-bottom: 25px; text-align: center;">
-                <i class="fas fa-credit-card"></i> Método de Pago
-            </h2>
-            
-            <div style="margin-bottom: 25px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px;">
-                <div style="color: var(--text-secondary); margin-bottom: 10px;">Resumen:</div>
-                <div id="paymentSummary"></div>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 25px;">
-                <div class="payment-method" onclick="selectPaymentMethod('transfer')">
-                    <i class="fas fa-university" style="font-size: 2rem; color: var(--primary);"></i>
-                    <span style="color: white; font-weight: 600;">Transferencia</span>
-                </div>
-                
-                <div class="payment-method" onclick="selectPaymentMethod('nequi')">
-                    <i class="fas fa-mobile-alt" style="font-size: 2rem; color: #00CC99;"></i>
-                    <span style="color: white; font-weight: 600;">Nequi</span>
-                </div>
-                
-                <div class="payment-method" onclick="selectPaymentMethod('daviplata')">
-                    <i class="fas fa-wallet" style="font-size: 2rem; color: #FF6B6B;"></i>
-                    <span style="color: white; font-weight: 600;">DaviPlata</span>
-                </div>
-                
-                <div class="payment-method" onclick="selectPaymentMethod('efecty')">
-                    <i class="fas fa-store" style="font-size: 2rem; color: #FBBF24;"></i>
-                    <span style="color: white; font-weight: 600;">Efecty</span>
-                </div>
-            </div>
-            
-            <div id="paymentDetails" style="display: none; margin-bottom: 20px;">
-                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px;">
-                    <h4 style="color: white; margin-bottom: 10px;" id="paymentMethodTitle"></h4>
-                    <div id="paymentInstructions"></div>
-                </div>
-            </div>
-            
-            <button class="btn btn-success" onclick="confirmPayment()" style="width: 100%;" id="confirmPaymentBtn">
-                <i class="fas fa-check-circle"></i> Confirmar Pago
-            </button>
-            
-            <button class="btn" onclick="closeModal('paymentModal')" 
-                    style="width: 100%; margin-top: 10px; background: none; color: var(--text-secondary);">
-                Cancelar
-            </button>
-        </div>
-    </div>
     
     <div class="container">
         <!-- HEADER PREMIUM -->
@@ -1003,8 +753,6 @@
                 </div>
                 
                 <p id="displayPrizeDesc" style="color:var(--text-secondary); font-size: 1rem; line-height: 1.6; margin-bottom: 20px;"></p>
-                
-                <div id="contadorSorteo"></div>
                 
                 <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 16px; border: 1px solid var(--glass-border);">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -1117,14 +865,9 @@
                 </h3>
                 
                 <div class="form-user">
-                    <input type="text" id="uNombre" placeholder="Nombre completo *" required oninput="validateField(this, 'name')">
-                    <div id="nombreValidation" class="validation-message"></div>
-                    
-                    <input type="text" id="uCiudad" placeholder="Ciudad (Ej: Cali) *" required oninput="validateField(this, 'city')">
-                    <div id="ciudadValidation" class="validation-message"></div>
-                    
-                    <input type="tel" id="uCelular" placeholder="Celular (Ej: 3001234567) *" required pattern="[0-9]{10}" maxlength="10" oninput="validateField(this, 'phone')">
-                    <div id="celularValidation" class="validation-message"></div>
+                    <input type="text" id="uNombre" placeholder="Nombre completo *" required>
+                    <input type="text" id="uCiudad" placeholder="Ciudad (Ej: Cali) *" required>
+                    <input type="tel" id="uCelular" placeholder="Celular (Ej: 3001234567) *" required pattern="[0-9]{10}" maxlength="10">
                 </div>
                 
                 <div style="background: rgba(99, 102, 241, 0.1); padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid rgba(99, 102, 241, 0.2);">
@@ -1134,9 +877,8 @@
                     </div>
                 </div>
                 
-                <!-- BOTÓN DE ACCIÓN PRINCIPAL -->
-                <button class="btn btn-success" onclick="validateAndReserve()" id="btnAction">
-                    <i class="fas fa-shopping-cart"></i> PROCEDER CON LA RESERVA
+                <button class="btn btn-success" onclick="sendWhatsApp()" id="btnWhatsApp">
+                    <i class="fab fa-whatsapp"></i> APARTAR POR WHATSAPP
                     <span id="selectedCountBadge" style="background: white; color: var(--success-dark); padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; margin-left: 8px; display: none;">0</span>
                 </button>
                 
@@ -1162,7 +904,7 @@
                 <input type="email" id="adminEmail" placeholder="Correo electrónico" required>
                 <input type="password" id="adminPass" placeholder="Contraseña" required>
                 
-                <button class="btn btn-primary" style="width:100%; margin-top: 25px;" onclick="adminLogin()">
+                <button class="btn btn-primary" style="width:100%; margin-top: 25px;" id="btnLoginFirebase">
                     <span id="loginText">Entrar al Panel</span>
                     <span id="loginSpinner" class="spinner hidden" style="margin-left: 10px;"></span>
                 </button>
@@ -1177,89 +919,7 @@
         
         <!-- PANEL ADMIN -->
         <div id="view-admin-panel" class="hidden">
-            <!-- PANEL DE SEGURIDAD -->
-            <div class="glass-effect" style="margin-top: 20px; display: none;" id="securityPanel">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="color: white; font-size: 1.3rem;">
-                        <i class="fas fa-shield-alt"></i> Panel de Seguridad
-                    </h3>
-                    <button class="btn-quick" onclick="refreshSecurityPanel()">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                </div>
-                
-                <!-- Estadísticas de seguridad -->
-                <div class="admin-stats">
-                    <div class="stat-card">
-                        <h4><i class="fas fa-ban"></i> Bloqueados</h4>
-                        <p id="statBlocked" style="color: var(--accent); font-size: 1.8rem; font-weight: 800;">0</p>
-                        <small>IPs bloqueadas</small>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <h4><i class="fas fa-exclamation-triangle"></i> Intentos</h4>
-                        <p id="statAttempts" style="color: var(--warning); font-size: 1.8rem; font-weight: 800;">0</p>
-                        <small>Intentos fallidos (24h)</small>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <h4><i class="fas fa-user-clock"></i> Activos</h4>
-                        <p id="statActive" style="color: var(--primary); font-size: 1.8rem; font-weight: 800;">0</p>
-                        <small>Usuarios activos hoy</small>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <h4><i class="fas fa-robot"></i> Sospechosos</h4>
-                        <p id="statSuspicious" style="color: #f97316; font-size: 1.8rem; font-weight: 800;">0</p>
-                        <small>Actividad sospechosa</small>
-                    </div>
-                </div>
-                
-                <!-- Lista de IPs bloqueadas -->
-                <div style="margin-top: 25px;">
-                    <h4 style="color: white; margin-bottom: 15px;">
-                        <i class="fas fa-list"></i> IPs Bloqueadas Actualmente
-                    </h4>
-                    <div id="blockedIPsList" style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; 
-                         max-height: 200px; overflow-y: auto; border: 1px solid var(--glass-border);">
-                        <div style="color: var(--text-secondary); text-align: center; padding: 20px;">
-                            No hay IPs bloqueadas
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Acciones de seguridad -->
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 20px;">
-                    <button class="btn" onclick="clearAllBlocks()" 
-                            style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.1)); 
-                                   border: 1px solid rgba(34, 197, 94, 0.3); color: #22c55e;">
-                        <i class="fas fa-unlock"></i> Desbloquear Todo
-                    </button>
-                    
-                    <button class="btn" onclick="exportSecurityLog()" 
-                            style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.1)); 
-                                   border: 1px solid rgba(99, 102, 241, 0.3); color: #a5b4fc;">
-                        <i class="fas fa-download"></i> Exportar Logs
-                    </button>
-                </div>
-                
-                <!-- Botón para mostrar/ocultar detalles -->
-                <button class="btn" onclick="toggleSecurityDetails()" 
-                        style="width: 100%; margin-top: 15px; background: rgba(255,255,255,0.05);">
-                    <i class="fas fa-eye"></i> Mostrar Detalles de Seguridad
-                </button>
-                
-                <!-- Detalles expandidos (oculto por defecto) -->
-                <div id="securityDetails" style="display: none; margin-top: 20px; padding-top: 20px; 
-                     border-top: 1px solid var(--glass-border);">
-                    <h4 style="color: white; margin-bottom: 15px;">
-                        <i class="fas fa-chart-bar"></i> Estadísticas Detalladas
-                    </h4>
-                    <div id="securityStatsDetails"></div>
-                </div>
-            </div>
-            
-            <!-- ESTADÍSTICAS PRINCIPALES -->
+            <!-- ESTADÍSTICAS -->
             <div class="admin-stats">
                 <div class="stat-card">
                     <h4 style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px;">
@@ -1275,20 +935,6 @@
                     <p id="statPendiente" style="font-size: 1.8rem; font-weight: 800; color: var(--warning); margin: 5px 0;">$0</p>
                     <small style="color: var(--text-secondary); font-size: 0.75rem;">Pendiente de pago</small>
                 </div>
-                <div class="stat-card">
-                    <h4 style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px;">
-                        <i class="fas fa-chart-pie"></i> Vendidos
-                    </h4>
-                    <p id="statVendidos" style="font-size: 1.8rem; font-weight: 800; color: var(--primary); margin: 5px 0;">0/1000</p>
-                    <small style="color: var(--text-secondary); font-size: 0.75rem;">Números ocupados</small>
-                </div>
-                <div class="stat-card">
-                    <h4 style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px;">
-                        <i class="fas fa-users"></i> Participantes
-                    </h4>
-                    <p id="statParticipantes" style="font-size: 1.8rem; font-weight: 800; color: var(--accent); margin: 5px 0;">0</p>
-                    <small style="color: var(--text-secondary); font-size: 0.75rem;">Total participantes</small>
-                </div>
             </div>
             
             <!-- PANEL PRINCIPAL ADMIN -->
@@ -1298,9 +944,6 @@
                         <i class="fas fa-chart-line"></i> Gestión de Ventas
                     </h3>
                     <div style="display: flex; gap: 10px;">
-                        <button id="securityToggleBtn" class="btn-quick" onclick="toggleSecurityPanel()" title="Panel de Seguridad">
-                            <i class="fas fa-shield-alt"></i>
-                        </button>
                         <button class="btn-quick" onclick="exportToExcel()" title="Exportar a Excel">
                             <i class="fas fa-file-excel"></i>
                         </button>
@@ -1322,7 +965,7 @@
                 </div>
                 
                 <!-- BUSCADOR ADMIN -->
-                <input type="text" id="adminSearch" placeholder="🔍 Buscar por número, nombre o ciudad..." oninput="updateAdminPanel()" style="margin-bottom: 20px;">
+                <input type="text" id="adminSearch" placeholder="🔍 Buscar por número, nombre o ciudad..." oninput="updateUI()" style="margin-bottom: 20px;">
                 
                 <!-- TABLA DE VENTAS -->
                 <div class="admin-table-container">
@@ -1331,7 +974,6 @@
                             <tr>
                                 <th>Número</th>
                                 <th>Participante</th>
-                                <th>Celular</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
@@ -1350,12 +992,11 @@
                     </button>
                 </div>
                 
-                <button class="btn sync-btn" onclick="forceSync()" 
-                        style="width:100%; margin-top:15px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); color:white; border: none;">
+                <button class="btn" onclick="forceSync()" style="width:100%; margin-top:15px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); color:white; border: none;">
                     <i class="fas fa-sync-alt"></i> Sincronizar con Firebase
                 </button>
                 
-                <button class="btn" onclick="adminLogout()" style="width:100%; margin-top:10px; background:none; color:var(--text-secondary); border: 1px solid var(--glass-border);">
+                <button class="btn" id="btnLogout" style="width:100%; margin-top:10px; background:none; color:var(--text-secondary); border: 1px solid var(--glass-border);">
                     <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
                 </button>
             </div>
@@ -1403,7 +1044,8 @@
                             <i class="fas fa-align-left"></i> Descripción / Subtítulo *
                         </label>
                         <textarea id="configDescripcion" 
-                                  placeholder="Describe el premio, condiciones y detalles importantes del sorteo..."></textarea>
+                                  placeholder="Describe el premio, condiciones y detalles importantes del sorteo..."
+                                  style="background: rgba(0,0,0,0.4); border: 2px solid transparent; padding: 15px; border-radius: 12px; color: white; width: 100%; outline: none; margin-bottom: 12px; font-size: 0.95rem; min-height: 100px; resize: vertical; font-family: inherit; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)) padding-box, linear-gradient(135deg, var(--glass-border), transparent) border-box;"></textarea>
                         <small style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-top: 5px;">
                             Describe el premio principal, reglas del sorteo y cualquier información relevante
                         </small>
@@ -1434,7 +1076,9 @@
                         <label style="display: block; color: white; margin-bottom: 8px; font-weight: 600;">
                             <i class="fas fa-calendar-alt"></i> Fecha del Sorteo *
                         </label>
-                        <input type="datetime-local" id="configFecha">
+                        <input type="datetime-local" 
+                               id="configFecha"
+                               style="background: rgba(0,0,0,0.4); border: 2px solid transparent; padding: 15px; border-radius: 12px; color: white; width: 100%; outline: none; font-size: 0.95rem; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)) padding-box, linear-gradient(135deg, var(--glass-border), transparent) border-box;">
                         <small style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-top: 5px;">
                             Fecha y hora en que se realizará el sorteo. Los participantes verán un contador.
                         </small>
@@ -1446,7 +1090,8 @@
                             <i class="fas fa-file-alt"></i> Información Adicional / Pie de Página
                         </label>
                         <textarea id="configPiePagina" 
-                                  placeholder="Información adicional, términos y condiciones, métodos de pago, contacto..."></textarea>
+                                  placeholder="Información adicional, términos y condiciones, métodos de pago, contacto..."
+                                  style="background: rgba(0,0,0,0.4); border: 2px solid transparent; padding: 15px; border-radius: 12px; color: white; width: 100%; outline: none; margin-bottom: 12px; font-size: 0.9rem; min-height: 120px; resize: vertical; font-family: inherit; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)) padding-box, linear-gradient(135deg, var(--glass-border), transparent) border-box;"></textarea>
                         <small style="color: var(--text-secondary); font-size: 0.8rem; display: block; margin-top: 5px;">
                             Información que aparecerá en la parte inferior. Puedes incluir términos, condiciones y datos de contacto.
                         </small>
@@ -1568,49 +1213,6 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- NOTIFICACIONES AUTOMÁTICAS -->
-            <div class="glass-effect" style="margin-top: 20px;">
-                <h3 style="color: white; margin-bottom: 20px; font-size: 1.5rem;">
-                    <i class="fas fa-bell"></i> Notificaciones Automáticas
-                </h3>
-                
-                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--glass-border);">
-                    <div style="display: flex; align-items: center; gap: 10px; color: var(--text-secondary); margin-bottom: 10px;">
-                        <i class="fas fa-info-circle" style="color: var(--primary);"></i>
-                        <span>Configura notificaciones automáticas para participantes</span>
-                    </div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
-                    <div>
-                        <label style="display: block; color: white; margin-bottom: 8px; font-weight: 600;">
-                            <i class="fas fa-comment"></i> Mensaje de Confirmación de Reserva
-                        </label>
-                        <textarea id="notificationReserva" placeholder="Mensaje que recibirán los participantes al reservar números..."></textarea>
-                    </div>
-                    
-                    <div>
-                        <label style="display: block; color: white; margin-bottom: 8px; font-weight: 600;">
-                            <i class="fas fa-money-check-alt"></i> Mensaje de Confirmación de Pago
-                        </label>
-                        <textarea id="notificationPago" placeholder="Mensaje que recibirán los participantes al confirmar pago..."></textarea>
-                    </div>
-                    
-                    <div>
-                        <label style="display: block; color: white; margin-bottom: 8px; font-weight: 600;">
-                            <i class="fas fa-exclamation-triangle"></i> Mensaje de Recordatorio (24h antes)
-                        </label>
-                        <textarea id="notificationRecordatorio" placeholder="Mensaje de recordatorio para pagos pendientes..."></textarea>
-                    </div>
-                </div>
-                
-                <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="saveNotificationConfig()">
-                    <i class="fas fa-save"></i> Guardar Configuración de Notificaciones
-                </button>
-                
-                <div id="notificationStatus" style="margin-top: 15px; padding: 12px; border-radius: 8px; display: none;"></div>
-            </div>
         </div>
     </div>
 
@@ -1618,67 +1220,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js"></script>
     <script>
         // =============================================
-        // CONFIGURACIÓN COMPLETA
+        // CONFIGURACIÓN Y VARIABLES GLOBALES
         // =============================================
-        
-        // CONFIGURACIÓN DE SEGURIDAD
         const TOTAL_NUMBERS = 1000;
-        const SECURITY_CONFIG = {
-            // Límites por usuario
-            MAX_NUMBERS_PER_TRANSACTION: 20,
-            MAX_NUMBERS_PER_USER_PER_DAY: 50,
-            MAX_TRANSACTIONS_PER_HOUR: 3,
-            MIN_TIME_BETWEEN_TRANSACTIONS: 60000, // 1 minuto en ms
-            
-            // Bloqueos
-            BLOCK_DURATION: 3600000, // 1 hora en ms
-            MAX_FAILED_ATTEMPTS: 5,
-            
-            // Validaciones
-            ALLOWED_CITIES: [
-                'cali', 'bogota', 'medellin', 'barranquilla', 'cartagena', 
-                'bucaramanga', 'pereira', 'manizales', 'armenia', 'ibague',
-                'villavicencio', 'cucuta', 'pasto', 'monteria', 'santa marta',
-                'buenaventura', 'palmira', 'bello', 'soledad', 'ituango'
-            ],
-            
-            // Formatos
-            PHONE_REGEX: /^3[0-9]{9}$/, // Celular colombiano: 3 + 9 dígitos
-            NAME_MIN_LENGTH: 3,
-            NAME_MAX_LENGTH: 50,
-            CITY_MIN_LENGTH: 2,
-            
-            // WhatsApp
-            WHATSAPP_REGEX: /^57[0-9]{10}$/, // 57 + 10 dígitos
-            WHATSAPP_COOLDOWN: 30000 // 30 segundos entre envíos
-        };
-
-        // CONFIGURACIÓN FIREBASE (REEMPLAZA CON TUS DATOS)
-  const FIREBASE_CONFIG = {  
-  apiKey: "AIzaSyC8j6OmhdGkyF_Jw0Fz88BG0fWuixnY-EY",
-  authDomain: "sbdinamicas-2025.firebaseapp.com",
-  projectId: "sbdinamicas-2025",
-  storageBucket: "sbdinamicas-2025.firebasestorage.app",
-  messagingSenderId: "465275725018",
-  appId: "1:465275725018:web:9f58c09a23a74a419171e3"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
-        // VARIABLES GLOBALES
         let WHATSAPP_NUMBER = "";
         let selected = [];
         let isFirebaseReady = false;
-        let firebaseApp = null;
-        let firestore = null;
-        let auth = null;
-        let currentUser = null;
+        let unsubscribeFirestore = null;
         let lastSearchTerm = '';
         let highlightedNumbers = [];
-        let selectedPaymentMethod = null;
-        let currentReservationData = null;
-
+        let adminPanelRef = null;
+        
         // BASE DE DATOS LOCAL
         window.db = JSON.parse(localStorage.getItem('sb_dinamicas_premium_db')) || {
             prize: "🎉 Sorteo Premium SB Dinámicas",
@@ -1694,227 +1246,14 @@ const app = initializeApp(firebaseConfig);
                 fechaSorteo: null,
                 piePagina: "",
                 colorPrincipal: "#6366f1"
-            },
-            notifications: {
-                reserva: "✅ Tu reserva ha sido registrada exitosamente. Números: {numeros}. Total: ${total}. Tienes 24 horas para realizar el pago.",
-                pago: "🎉 ¡Pago confirmado! Tus números {numeros} están oficialmente registrados en el sorteo. ¡Buena suerte!",
-                recordatorio: "⏰ Recordatorio: Tienes pendiente el pago de los números {numeros}. Total: ${total}. Realiza el pago antes de que expire tu reserva."
             }
         };
-
-        // =============================================
-        // REGISTRO DE ACTIVIDAD Y SEGURIDAD
-        // =============================================
-        window.securityLog = {
-            failedAttempts: JSON.parse(localStorage.getItem('sb_failed_attempts')) || {},
-            userActivity: JSON.parse(localStorage.getItem('sb_user_activity')) || {},
-            tempBlocks: JSON.parse(localStorage.getItem('sb_temp_blocks')) || {},
-            transactionLog: JSON.parse(localStorage.getItem('sb_transaction_log')) || [],
-            
-            save: function() {
-                localStorage.setItem('sb_failed_attempts', JSON.stringify(this.failedAttempts));
-                localStorage.setItem('sb_user_activity', JSON.stringify(this.userActivity));
-                localStorage.setItem('sb_temp_blocks', JSON.stringify(this.tempBlocks));
-                localStorage.setItem('sb_transaction_log', JSON.stringify(this.transactionLog.slice(-1000)));
-            },
-            
-            getClientIP: function() {
-                return 'browser-' + (localStorage.getItem('sb_client_id') || 
-                       'id-' + Math.random().toString(36).substr(2, 9));
-            },
-            
-            getClientId: function() {
-                let clientId = localStorage.getItem('sb_client_id');
-                if (!clientId) {
-                    clientId = 'client-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-                    localStorage.setItem('sb_client_id', clientId);
-                }
-                return clientId;
-            }
-        };
-
-        // Inicializar ID de cliente
-        if (!localStorage.getItem('sb_client_id')) {
-            localStorage.setItem('sb_client_id', 
-                'sb-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9));
-        }
-
-        // =============================================
-        // INICIALIZACIÓN FIREBASE
-        // =============================================
         
-        function initFirebase() {
-            try {
-                firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
-                firestore = firebase.firestore();
-                auth = firebase.auth();
-                
-                // Configurar persistencia
-                firestore.enablePersistence()
-                    .then(() => {
-                        console.log("Firebase persistence enabled");
-                        isFirebaseReady = true;
-                        updateConnectionStatus("online", "Conectado a Firebase");
-                    })
-                    .catch((err) => {
-                        console.warn("Firebase persistence error:", err);
-                        isFirebaseReady = true;
-                        updateConnectionStatus("online", "Conectado (sin persistencia)");
-                    });
-                
-                // Escuchar cambios de autenticación
-                auth.onAuthStateChanged((user) => {
-                    currentUser = user;
-                    if (user && window.db.isAdmin) {
-                        showTab('admin-panel');
-                        loadFirebaseData();
-                    }
-                });
-                
-                // Intentar cargar datos existentes
-                setTimeout(loadFirebaseData, 1000);
-                
-            } catch (error) {
-                console.error("Firebase init error:", error);
-                isFirebaseReady = false;
-                updateConnectionStatus("offline", "Sin conexión Firebase");
-                showNotification("Usando modo offline", "warning");
-            }
-        }
-        
-        function updateConnectionStatus(status, text) {
-            const statusEl = document.getElementById('connectionStatus');
-            const textEl = document.getElementById('connectionText');
-            const dotEl = statusEl.querySelector('.status-dot');
-            
-            if (!statusEl) return;
-            
-            statusEl.className = `connection-status ${status}`;
-            dotEl.className = `status-dot ${status}`;
-            textEl.textContent = text;
-            statusEl.classList.remove('hidden');
-        }
-        
-        function loadFirebaseData() {
-            if (!isFirebaseReady || !firestore) {
-                console.log("Firebase no está listo");
-                return;
-            }
-            
-            updateConnectionStatus("syncing", "Sincronizando...");
-            
-            // Cargar configuración
-            firestore.collection('config').doc('sorteo').get()
-                .then((doc) => {
-                    if (doc.exists) {
-                        const data = doc.data();
-                        window.db.prize = data.prize || window.db.prize;
-                        window.db.desc = data.desc || window.db.desc;
-                        window.db.price = data.price || window.db.price;
-                        window.db.img = data.img || window.db.img;
-                        window.db.configCompleta = data.configCompleta || window.db.configCompleta;
-                        window.db.whatsappNumber = data.whatsappNumber || window.db.whatsappNumber;
-                        window.db.notifications = data.notifications || window.db.notifications;
-                        
-                        save();
-                        updateUI();
-                        initWhatsAppNumber();
-                        updateConnectionStatus("online", "Sincronizado");
-                    }
-                })
-                .catch((error) => {
-                    console.warn("Error loading config:", error);
-                    updateConnectionStatus("online", "Usando datos locales");
-                });
-            
-            // Cargar números vendidos
-            firestore.collection('ventas').get()
-                .then((querySnapshot) => {
-                    querySnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        window.db.soldNumbers[doc.id] = data;
-                    });
-                    save();
-                    updateUI();
-                    console.log("Datos cargados de Firebase:", Object.keys(window.db.soldNumbers).length, "números");
-                })
-                .catch((error) => {
-                    console.warn("Error loading sales:", error);
-                });
-        }
-        
-        function saveToFirebase() {
-            if (!isFirebaseReady || !currentUser || !firestore) {
-                console.log("No se puede guardar en Firebase: no autenticado");
-                return;
-            }
-            
-            updateConnectionStatus("syncing", "Guardando en Firebase...");
-            
-            // Guardar configuración
-            firestore.collection('config').doc('sorteo').set({
-                prize: window.db.prize,
-                desc: window.db.desc,
-                price: window.db.price,
-                img: window.db.img,
-                configCompleta: window.db.configCompleta,
-                whatsappNumber: window.db.whatsappNumber,
-                notifications: window.db.notifications,
-                lastUpdate: firebase.firestore.FieldValue.serverTimestamp(),
-                updatedBy: currentUser.email
-            })
-            .then(() => {
-                console.log("Configuración guardada en Firebase");
-            })
-            .catch((error) => {
-                console.error("Error guardando configuración:", error);
-            });
-            
-            // Guardar números vendidos
-            const batch = firestore.batch();
-            let count = 0;
-            
-            for (const [numero, data] of Object.entries(window.db.soldNumbers)) {
-                if (count >= 500) break; // Límite de batch
-                const docRef = firestore.collection('ventas').doc(numero);
-                batch.set(docRef, data);
-                count++;
-            }
-            
-            if (count > 0) {
-                batch.commit()
-                    .then(() => {
-                        console.log("Ventas guardadas en Firebase:", count, "registros");
-                        updateConnectionStatus("online", "Datos guardados");
-                        window.db.lastSync = new Date().toISOString();
-                        save();
-                    })
-                    .catch((error) => {
-                        console.error("Error guardando ventas:", error);
-                        updateConnectionStatus("online", "Error guardando");
-                    });
-            }
-        }
-        
-        function forceSync() {
-            if (!isFirebaseReady) {
-                showNotification("Firebase no está disponible", "error");
-                return;
-            }
-            
-            if (!currentUser) {
-                showNotification("Debes iniciar sesión como administrador", "error");
-                return;
-            }
-            
-            saveToFirebase();
-            showNotification("Sincronización iniciada", "success");
-        }
-
         // =============================================
         // FUNCIONES DE UTILIDAD
         // =============================================
         
+        // Mostrar notificación
         function showNotification(message, type = 'info', duration = 4000) {
             const notification = document.getElementById('notification');
             notification.textContent = message;
@@ -1928,16 +1267,19 @@ const app = initializeApp(firebaseConfig);
             }, duration);
         }
         
+        // Escape HTML para seguridad
         function escapeHTML(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
         
+        // Validar número de WhatsApp
         function isValidWhatsAppNumber(number) {
             return /^57\d{10}$/.test(number);
         }
         
+        // Formatear dinero
         function formatMoney(amount) {
             return new Intl.NumberFormat('es-CO', {
                 style: 'currency',
@@ -1946,432 +1288,12 @@ const app = initializeApp(firebaseConfig);
             }).format(amount);
         }
         
-        function save() {
-            localStorage.setItem('sb_dinamicas_premium_db', JSON.stringify(window.db));
-        }
-        
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-        }
-        
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.remove('hidden');
-        }
-
-        // =============================================
-        // FUNCIONES DE VALIDACIÓN Y SEGURIDAD
-        // =============================================
-
-        function isValidFullName(name) {
-            if (!name || typeof name !== 'string') return false;
-            const trimmed = name.trim();
-            
-            if (trimmed.length < SECURITY_CONFIG.NAME_MIN_LENGTH || 
-                trimmed.length > SECURITY_CONFIG.NAME_MAX_LENGTH) {
-                return false;
-            }
-            
-            const parts = trimmed.split(' ').filter(part => part.length > 0);
-            if (parts.length < 2) return false;
-            
-            if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.'-]+$/.test(trimmed)) return false;
-            if (/(.)\1{4,}/.test(trimmed.toLowerCase())) return false;
-            
-            return true;
-        }
-
-        function isValidCity(city) {
-            if (!city || typeof city !== 'string') return false;
-            const trimmed = city.trim();
-            
-            if (trimmed.length < SECURITY_CONFIG.CITY_MIN_LENGTH) return false;
-            if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s.-]+$/.test(trimmed)) return false;
-            
-            const normalized = trimmed.toLowerCase()
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-                .replace(/[^a-z\s]/g, "");
-            
-            return SECURITY_CONFIG.ALLOWED_CITIES.some(allowed => 
-                normalized.includes(allowed.toLowerCase()) || 
-                allowed.toLowerCase().includes(normalized)
-            );
-        }
-
-        function validateAndFormatPhone(phone) {
-            if (!phone || typeof phone !== 'string') return null;
-            const cleaned = phone.replace(/\D/g, '');
-            return SECURITY_CONFIG.PHONE_REGEX.test(cleaned) ? cleaned : null;
-        }
-
-        function validateNumberSelection(numbers) {
-            const errors = [];
-            
-            if (!Array.isArray(numbers) || numbers.length === 0) {
-                errors.push("No hay números seleccionados");
-                return { isValid: false, errors };
-            }
-            
-            if (numbers.length > SECURITY_CONFIG.MAX_NUMBERS_PER_TRANSACTION) {
-                errors.push(`Máximo ${SECURITY_CONFIG.MAX_NUMBERS_PER_TRANSACTION} números por transacción`);
-            }
-            
-            const uniqueNumbers = [...new Set(numbers)];
-            if (uniqueNumbers.length !== numbers.length) {
-                errors.push("Hay números duplicados en tu selección");
-            }
-            
-            for (const num of numbers) {
-                if (!/^\d{3}$/.test(num)) {
-                    errors.push(`Número inválido: ${num}`);
-                } else {
-                    const numInt = parseInt(num);
-                    if (numInt < 0 || numInt >= TOTAL_NUMBERS) {
-                        errors.push(`Número fuera de rango: ${num}`);
-                    }
-                }
-            }
-            
-            const unavailable = numbers.filter(n => 
-                window.db.soldNumbers[n] && window.db.soldNumbers[n].pagado
-            );
-            
-            if (unavailable.length > 0) {
-                errors.push(`Números ya pagados: ${unavailable.slice(0, 5).join(', ')}${unavailable.length > 5 ? '...' : ''}`);
-            }
-            
-            return {
-                isValid: errors.length === 0,
-                errors,
-                cleanedNumbers: uniqueNumbers
-            };
-        }
-
-        function checkUserLimits(phone, numbersCount) {
-            const clientId = window.securityLog.getClientId();
-            const now = Date.now();
-            const oneDay = 24 * 60 * 60 * 1000;
-            const userKey = phone || clientId;
-            
-            let userActivity = window.securityLog.userActivity[userKey] || {
-                transactions: [],
-                numbersToday: 0,
-                lastTransaction: 0,
-                blockedUntil: null
-            };
-            
-            // Verificar bloqueo
-            if (userActivity.blockedUntil && now < userActivity.blockedUntil) {
-                const remaining = Math.ceil((userActivity.blockedUntil - now) / 60000);
-                return {
-                    allowed: false,
-                    reason: `Usuario bloqueado. Intenta en ${remaining} minutos`,
-                    userActivity
-                };
-            }
-            
-            // Límite diario
-            const todayStart = new Date().setHours(0, 0, 0, 0);
-            const transactionsToday = userActivity.transactions.filter(t => 
-                t.timestamp >= todayStart
-            );
-            const numbersToday = transactionsToday.reduce((sum, t) => sum + t.numbersCount, 0);
-            
-            if (numbersToday + numbersCount > SECURITY_CONFIG.MAX_NUMBERS_PER_USER_PER_DAY) {
-                return {
-                    allowed: false,
-                    reason: `Límite diario alcanzado. Máximo ${SECURITY_CONFIG.MAX_NUMBERS_PER_USER_PER_DAY} números por día`,
-                    userActivity
-                };
-            }
-            
-            // Límite por hora
-            const oneHourAgo = now - 3600000;
-            const recentTransactions = userActivity.transactions.filter(t => 
-                t.timestamp >= oneHourAgo
-            );
-            
-            if (recentTransactions.length >= SECURITY_CONFIG.MAX_TRANSACTIONS_PER_HOUR) {
-                return {
-                    allowed: false,
-                    reason: `Máximo ${SECURITY_CONFIG.MAX_TRANSACTIONS_PER_HOUR} transacciones por hora`,
-                    userActivity
-                };
-            }
-            
-            // Tiempo mínimo entre transacciones
-            if (userActivity.lastTransaction > 0) {
-                const timeSinceLast = now - userActivity.lastTransaction;
-                if (timeSinceLast < SECURITY_CONFIG.MIN_TIME_BETWEEN_TRANSACTIONS) {
-                    const waitSeconds = Math.ceil((SECURITY_CONFIG.MIN_TIME_BETWEEN_TRANSACTIONS - timeSinceLast) / 1000);
-                    return {
-                        allowed: false,
-                        reason: `Espera ${waitSeconds} segundos antes de otra transacción`,
-                        userActivity
-                    };
-                }
-            }
-            
-            return { allowed: true, reason: "", userActivity };
-        }
-
-        function logSuccessfulTransaction(phone, numbers, action = 'reservation') {
-            const clientId = window.securityLog.getClientId();
-            const userKey = phone || clientId;
-            const now = Date.now();
-            
-            let userActivity = window.securityLog.userActivity[userKey] || {
-                transactions: [],
-                numbersToday: 0,
-                lastTransaction: 0,
-                blockedUntil: null
-            };
-            
-            userActivity.transactions.push({
-                timestamp: now,
-                numbers: [...numbers],
-                numbersCount: numbers.length,
-                action: action,
-                clientId: clientId
-            });
-            
-            if (userActivity.transactions.length > 50) {
-                userActivity.transactions = userActivity.transactions.slice(-50);
-            }
-            
-            userActivity.lastTransaction = now;
-            window.securityLog.userActivity[userKey] = userActivity;
-            
-            window.securityLog.transactionLog.push({
-                timestamp: now,
-                userKey: userKey,
-                numbers: numbers,
-                action: action,
-                ip: window.securityLog.getClientIP()
-            });
-            
-            window.securityLog.save();
-            console.log(`📝 Transacción registrada: ${action} para ${numbers.length} números`);
-        }
-
-        function logFailedAttempt(reason) {
-            const ip = window.securityLog.getClientIP();
-            const now = Date.now();
-            
-            if (!window.securityLog.failedAttempts[ip]) {
-                window.securityLog.failedAttempts[ip] = {
-                    count: 0,
-                    firstAttempt: now,
-                    lastAttempt: now,
-                    reasons: []
-                };
-            }
-            
-            const attempt = window.securityLog.failedAttempts[ip];
-            attempt.count++;
-            attempt.lastAttempt = now;
-            attempt.reasons.push({ timestamp: now, reason: reason });
-            
-            if (attempt.reasons.length > 20) {
-                attempt.reasons = attempt.reasons.slice(-20);
-            }
-            
-            const oneHourAgo = now - 3600000;
-            const recentAttempts = attempt.reasons.filter(r => r.timestamp >= oneHourAgo);
-            
-            if (recentAttempts.length >= SECURITY_CONFIG.MAX_FAILED_ATTEMPTS) {
-                const blockKey = `block-${ip}`;
-                window.securityLog.tempBlocks[blockKey] = now + SECURITY_CONFIG.BLOCK_DURATION;
-                console.warn(`🚫 IP bloqueada: ${ip} por demasiados intentos fallidos`);
-                showNotification(`Demasiados intentos fallidos. IP bloqueada por 1 hora.`, "error", 5000);
-            }
-            
-            window.securityLog.save();
-            return attempt.count;
-        }
-
-        function isClientBlocked() {
-            const ip = window.securityLog.getClientIP();
-            const blockKey = `block-${ip}`;
-            
-            if (window.securityLog.tempBlocks[blockKey]) {
-                const blockUntil = window.securityLog.tempBlocks[blockKey];
-                const now = Date.now();
-                
-                if (now < blockUntil) {
-                    const remainingMinutes = Math.ceil((blockUntil - now) / 60000);
-                    return {
-                        blocked: true,
-                        remainingMinutes: remainingMinutes,
-                        message: `IP bloqueada. Intenta en ${remainingMinutes} minutos`
-                    };
-                } else {
-                    delete window.securityLog.tempBlocks[blockKey];
-                    window.securityLog.save();
-                }
-            }
-            
-            return { blocked: false };
-        }
-
-        function cleanupExpiredBlocks() {
-            const now = Date.now();
-            let cleaned = false;
-            
-            for (const [key, expires] of Object.entries(window.securityLog.tempBlocks)) {
-                if (now >= expires) {
-                    delete window.securityLog.tempBlocks[key];
-                    cleaned = true;
-                }
-            }
-            
-            const oneDayAgo = now - 24 * 60 * 60 * 1000;
-            for (const [ip, data] of Object.entries(window.securityLog.failedAttempts)) {
-                if (data.lastAttempt < oneDayAgo) {
-                    delete window.securityLog.failedAttempts[ip];
-                    cleaned = true;
-                }
-            }
-            
-            if (cleaned) window.securityLog.save();
-            return cleaned;
-        }
-
-        function validateCompleteReservation(nombre, ciudad, celular, numeros) {
-            const errors = [];
-            const warnings = [];
-            
-            // 1. Verificar bloqueos
-            const blockCheck = isClientBlocked();
-            if (blockCheck.blocked) {
-                errors.push(blockCheck.message);
-                return { isValid: false, errors, warnings, celularFormateado: null };
-            }
-            
-            // 2. Validar nombre
-            if (!isValidFullName(nombre)) {
-                errors.push("Nombre inválido. Debe tener nombre y apellido, solo letras");
-            }
-            
-            // 3. Validar ciudad
-            if (!isValidCity(ciudad)) {
-                errors.push(`Ciudad no permitida. Ciudades válidas: ${SECURITY_CONFIG.ALLOWED_CITIES.slice(0, 5).join(', ')}...`);
-            }
-            
-            // 4. Validar celular
-            const celularFormateado = validateAndFormatPhone(celular);
-            if (!celularFormateado) {
-                errors.push("Celular inválido. Debe comenzar con 3 y tener 10 dígitos");
-            }
-            
-            // 5. Validar números
-            const numberValidation = validateNumberSelection(numeros);
-            if (!numberValidation.isValid) {
-                errors.push(...numberValidation.errors);
-            }
-            
-            // 6. Verificar límites del usuario
-            if (celularFormateado && numberValidation.cleanedNumbers) {
-                const limitCheck = checkUserLimits(
-                    celularFormateado, 
-                    numberValidation.cleanedNumbers.length
-                );
-                
-                if (!limitCheck.allowed) {
-                    errors.push(limitCheck.reason);
-                }
-            }
-            
-            // 7. Verificar disponibilidad real
-            if (numberValidation.cleanedNumbers) {
-                const realmenteDisponibles = numberValidation.cleanedNumbers.filter(n => {
-                    const sold = window.db.soldNumbers[n];
-                    return !sold || (sold && !sold.pagado && sold.celular !== celularFormateado);
-                });
-                
-                if (realmenteDisponibles.length !== numberValidation.cleanedNumbers.length) {
-                    const noDisponibles = numberValidation.cleanedNumbers.filter(n => 
-                        !realmenteDisponibles.includes(n)
-                    );
-                    
-                    warnings.push(`Algunos números pueden no estar disponibles: ${noDisponibles.slice(0, 3).join(', ')}${noDisponibles.length > 3 ? '...' : ''}`);
-                }
-            }
-            
-            // Si hay errores, registrar intento fallido
-            if (errors.length > 0) {
-                const attemptCount = logFailedAttempt(errors.join('; '));
-                if (attemptCount >= 3) {
-                    warnings.push(`⚠️ Has tenido ${attemptCount} intentos fallidos. Demasiados intentos pueden bloquear tu IP.`);
-                }
-            }
-            
-            return {
-                isValid: errors.length === 0,
-                errors,
-                warnings,
-                celularFormateado,
-                numerosLimpios: numberValidation.cleanedNumbers || [],
-                timestamp: Date.now()
-            };
-        }
-
-        // =============================================
-        // VALIDACIÓN DE CAMPOS EN TIEMPO REAL
-        // =============================================
-        
-        function validateField(input, type) {
-            const value = input.value.trim();
-            const validationId = input.id.replace('u', '') + 'Validation';
-            const validationEl = document.getElementById(validationId);
-            
-            if (!validationEl) return;
-            
-            let isValid = false;
-            let message = "";
-            
-            switch(type) {
-                case 'name':
-                    isValid = isValidFullName(value);
-                    message = isValid ? "✓ Nombre válido" : "✗ Debe tener nombre y apellido (solo letras)";
-                    break;
-                case 'city':
-                    isValid = isValidCity(value);
-                    message = isValid ? "✓ Ciudad válida" : "✗ Ciudad no permitida o formato incorrecto";
-                    break;
-                case 'phone':
-                    const formatted = validateAndFormatPhone(value);
-                    isValid = formatted !== null;
-                    message = isValid ? "✓ Celular válido" : "✗ Debe ser celular colombiano (10 dígitos, comienza con 3)";
-                    break;
-            }
-            
-            input.classList.remove('input-valid', 'input-invalid');
-            validationEl.classList.remove('validation-success', 'validation-error');
-            
-            if (value === "") {
-                validationEl.style.display = 'none';
-                return;
-            }
-            
-            if (isValid) {
-                input.classList.add('input-valid');
-                validationEl.textContent = message;
-                validationEl.classList.add('validation-success');
-                validationEl.style.display = 'block';
-            } else {
-                input.classList.add('input-invalid');
-                validationEl.textContent = message;
-                validationEl.classList.add('validation-error');
-                validationEl.style.display = 'block';
-            }
-        }
-
         // =============================================
         // FUNCIONES DE WHATSAPP
         // =============================================
         
         function initWhatsAppNumber() {
+            // Cargar desde base de datos local
             if (window.db.whatsappNumber && isValidWhatsAppNumber(window.db.whatsappNumber)) {
                 WHATSAPP_NUMBER = window.db.whatsappNumber;
                 updateWhatsAppStatus();
@@ -2379,6 +1301,7 @@ const app = initializeApp(firebaseConfig);
                 return true;
             }
             
+            // Cargar desde localStorage
             const savedNumber = localStorage.getItem('sb_whatsapp_number');
             if (savedNumber && isValidWhatsAppNumber(savedNumber)) {
                 WHATSAPP_NUMBER = savedNumber;
@@ -2389,6 +1312,7 @@ const app = initializeApp(firebaseConfig);
                 return true;
             }
             
+            // No configurado
             showWhatsAppAlert();
             WHATSAPP_NUMBER = "";
             updateWhatsAppStatus();
@@ -2397,27 +1321,27 @@ const app = initializeApp(firebaseConfig);
         
         function updateWhatsAppStatus() {
             const statusEl = document.getElementById('whatsappCurrent');
-            if (!statusEl) return;
-            
-            if (WHATSAPP_NUMBER) {
-                const formatted = WHATSAPP_NUMBER.replace(/^57/, '+57 ');
-                statusEl.innerHTML = `
-                    <div style="color: var(--success);">
-                        <i class="fas fa-check-circle"></i> Configurado correctamente
-                    </div>
-                    <div style="margin-top: 5px; font-size: 0.85rem;">
-                        Número: <strong>${formatted}</strong>
-                    </div>
-                `;
-            } else {
-                statusEl.innerHTML = `
-                    <div style="color: var(--accent);">
-                        <i class="fas fa-exclamation-triangle"></i> No configurado
-                    </div>
-                    <div style="margin-top: 5px; font-size: 0.85rem;">
-                        Configura un número para recibir reservas
-                    </div>
-                `;
+            if (statusEl) {
+                if (WHATSAPP_NUMBER) {
+                    const formatted = WHATSAPP_NUMBER.replace(/^57/, '+57 ');
+                    statusEl.innerHTML = `
+                        <div style="color: var(--success);">
+                            <i class="fas fa-check-circle"></i> Configurado correctamente
+                        </div>
+                        <div style="margin-top: 5px; font-size: 0.85rem;">
+                            Número: <strong>${formatted}</strong>
+                        </div>
+                    `;
+                } else {
+                    statusEl.innerHTML = `
+                        <div style="color: var(--accent);">
+                            <i class="fas fa-exclamation-triangle"></i> No configurado
+                        </div>
+                        <div style="margin-top: 5px; font-size: 0.85rem;">
+                            Configura un número para recibir reservas
+                        </div>
+                    `;
+                }
             }
         }
         
@@ -2445,11 +1369,6 @@ const app = initializeApp(firebaseConfig);
             window.db.whatsappNumber = numberInput;
             save();
             
-            // Guardar en Firebase si está disponible
-            if (isFirebaseReady && currentUser) {
-                saveToFirebase();
-            }
-            
             hideWhatsAppAlert();
             showStatus(statusEl, "✅ WhatsApp configurado exitosamente", "success");
             updateWhatsAppStatus();
@@ -2457,53 +1376,50 @@ const app = initializeApp(firebaseConfig);
         }
         
         function showStatus(element, message, type) {
-            if (!element) return;
-            
-            element.textContent = message;
-            element.style.display = 'block';
-            element.style.background = type === 'success' 
-                ? 'rgba(34, 197, 94, 0.1)' 
-                : 'rgba(244, 63, 94, 0.1)';
-            element.style.border = type === 'success' 
-                ? '1px solid rgba(34, 197, 94, 0.3)' 
-                : '1px solid rgba(244, 63, 94, 0.3)';
-            element.style.color = type === 'success' ? '#22c55e' : '#f43f5e';
-            
-            setTimeout(() => {
-                element.style.display = 'none';
-            }, 5000);
+            if (element) {
+                element.textContent = message;
+                element.style.display = 'block';
+                element.style.background = type === 'success' 
+                    ? 'rgba(34, 197, 94, 0.1)' 
+                    : 'rgba(244, 63, 94, 0.1)';
+                element.style.border = type === 'success' 
+                    ? '1px solid rgba(34, 197, 94, 0.3)' 
+                    : '1px solid rgba(244, 63, 94, 0.3)';
+                element.style.color = type === 'success' ? '#22c55e' : '#f43f5e';
+                
+                setTimeout(() => {
+                    element.style.display = 'none';
+                }, 5000);
+            }
         }
-
+        
         // =============================================
-        // FUNCIONES DE CONFIGURACIÓN COMPLETA
+        // FUNCIONES PARA CONFIGURACIÓN COMPLETA
         // =============================================
         
         function cargarConfiguracionActual() {
             console.log("Cargando configuración actual...");
             
+            // Cargar datos básicos
             document.getElementById('configTitulo').value = window.db.prize || "";
             document.getElementById('configDescripcion').value = window.db.desc || "";
             document.getElementById('configValor').value = window.db.price || 20000;
             
+            // Cargar datos extendidos
             if (window.db.configCompleta) {
                 const config = window.db.configCompleta;
                 document.getElementById('configFecha').value = config.fechaSorteo || "";
                 document.getElementById('configPiePagina').value = config.piePagina || "";
                 document.getElementById('configColorPrincipal').value = config.colorPrincipal || "#6366f1";
             } else {
+                // Valores por defecto
                 const fechaPredeterminada = new Date();
                 fechaPredeterminada.setDate(fechaPredeterminada.getDate() + 30);
                 document.getElementById('configFecha').value = fechaPredeterminada.toISOString().slice(0, 16);
                 document.getElementById('configPiePagina').value = "• El sorteo se realizará de forma transparente y será transmitido en vivo.\n• Los ganadores serán notificados por WhatsApp.\n• Para reclamar premios mayores a $500,000 se requiere identificación.";
             }
             
-            // Cargar notificaciones
-            if (window.db.notifications) {
-                document.getElementById('notificationReserva').value = window.db.notifications.reserva || "";
-                document.getElementById('notificationPago').value = window.db.notifications.pago || "";
-                document.getElementById('notificationRecordatorio').value = window.db.notifications.recordatorio || "";
-            }
-            
+            // Mostrar vista previa de imagen si existe
             if (window.db.img) {
                 const previewImg = document.getElementById('configImagenPreviewImg');
                 previewImg.src = window.db.img;
@@ -2519,11 +1435,13 @@ const app = initializeApp(firebaseConfig);
             
             const file = input.files[0];
             
+            // Validar tamaño
             if (file.size > 5 * 1024 * 1024) {
                 showNotification("La imagen no debe superar 5MB", "error");
                 return;
             }
             
+            // Validar tipo
             if (!file.type.match('image.*')) {
                 showNotification("Solo se permiten imágenes", "error");
                 return;
@@ -2531,11 +1449,17 @@ const app = initializeApp(firebaseConfig);
             
             const reader = new FileReader();
             reader.onload = (e) => { 
+                // Guardar en la base de datos
                 window.db.img = e.target.result;
+                
+                // Mostrar vista previa
                 const previewImg = document.getElementById('configImagenPreviewImg');
                 previewImg.src = e.target.result;
                 document.getElementById('configImagenPreview').style.display = 'block';
+                
+                // Actualizar vista previa
                 actualizarVistaPrevia();
+                
                 showNotification("Imagen cargada exitosamente", "success");
             };
             reader.onerror = () => {
@@ -2554,6 +1478,7 @@ const app = initializeApp(firebaseConfig);
             
             const statusEl = document.getElementById('configCompletaStatus');
             
+            // Validaciones
             if (!titulo || titulo.length < 5) {
                 showStatus(statusEl, "❌ El título debe tener al menos 5 caracteres", "error");
                 return;
@@ -2574,10 +1499,12 @@ const app = initializeApp(firebaseConfig);
                 return;
             }
             
+            // Guardar en la base de datos
             window.db.prize = escapeHTML(titulo);
             window.db.desc = escapeHTML(descripcion);
             window.db.price = valor;
             
+            // Guardar configuración extendida
             window.db.configCompleta = {
                 fechaSorteo: fecha,
                 piePagina: escapeHTML(piePagina),
@@ -2585,32 +1512,41 @@ const app = initializeApp(firebaseConfig);
                 ultimaActualizacion: new Date().toISOString()
             };
             
+            // Aplicar color personalizado
             if (colorPrincipal && colorPrincipal !== "#6366f1") {
                 aplicarColorPersonalizado(colorPrincipal);
             }
             
+            // Guardar cambios
             save();
             
-            // Guardar en Firebase si está disponible
-            if (isFirebaseReady && currentUser) {
-                saveToFirebase();
-            }
-            
+            // Mostrar confirmación
             showStatus(statusEl, "✅ Configuración completa guardada exitosamente", "success");
             showNotification("Configuración del sorteo actualizada", "success");
+            
+            // Actualizar vista previa
             actualizarVistaPrevia();
+            
+            // Actualizar UI principal
             updateUI();
             
+            // Cerrar después de guardar (opcional)
             setTimeout(() => {
                 showTab('admin-panel');
             }, 1500);
         }
         
         function aplicarColorPersonalizado(color) {
+            // Actualizar variables CSS
             document.documentElement.style.setProperty('--primary', color);
+            
+            // Calcular color oscuro para hover
             const colorOscuro = oscurecerColor(color, 20);
             document.documentElement.style.setProperty('--primary-dark', colorOscuro);
+            
+            // Actualizar color de números seleccionados
             document.documentElement.style.setProperty('--color-seleccionado', color);
+            
             console.log("Color personalizado aplicado:", color);
         }
         
@@ -2700,8 +1636,10 @@ const app = initializeApp(firebaseConfig);
                     const dias = Math.floor(diferenciaMs / (1000 * 60 * 60 * 24));
                     const horas = Math.floor((diferenciaMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     
+                    // Buscar o crear contador en la vista usuario
                     let contadorEl = document.getElementById('contadorSorteo');
                     if (!contadorEl) {
+                        // Crear contador si no existe
                         const panelPremio = document.querySelector('#view-user .glass-effect');
                         if (panelPremio) {
                             contadorEl = document.createElement('div');
@@ -2740,35 +1678,6 @@ const app = initializeApp(firebaseConfig);
             }
         }
         
-        function saveNotificationConfig() {
-            const reserva = document.getElementById('notificationReserva').value.trim();
-            const pago = document.getElementById('notificationPago').value.trim();
-            const recordatorio = document.getElementById('notificationRecordatorio').value.trim();
-            
-            const statusEl = document.getElementById('notificationStatus');
-            
-            if (!reserva || !pago || !recordatorio) {
-                showStatus(statusEl, "❌ Todos los campos de notificación son requeridos", "error");
-                return;
-            }
-            
-            window.db.notifications = {
-                reserva: reserva,
-                pago: pago,
-                recordatorio: recordatorio
-            };
-            
-            save();
-            
-            // Guardar en Firebase si está disponible
-            if (isFirebaseReady && currentUser) {
-                saveToFirebase();
-            }
-            
-            showStatus(statusEl, "✅ Configuración de notificaciones guardada", "success");
-            showNotification("Notificaciones configuradas", "success");
-        }
-
         // =============================================
         // FUNCIONES PRINCIPALES DE LA APLICACIÓN
         // =============================================
@@ -2800,32 +1709,33 @@ const app = initializeApp(firebaseConfig);
             updateUI();
         }
         
-        function updateUI() {
-            // Actualizar información del sorteo
-            document.getElementById('displayPrizeTitle').textContent = window.db.prize;
-            document.getElementById('displayPrizeDesc').textContent = window.db.desc;
-            document.getElementById('displayPrice').textContent = window.db.price.toLocaleString('es-CO');
-            
-            // Mostrar/ocultar imagen
-            const imgContainer = document.getElementById('prizeImageContainer');
-            const imgElement = document.getElementById('displayPrizeImg');
-            if (window.db.img && window.db.img.trim() !== '') {
-                imgElement.src = window.db.img;
-                imgContainer.style.display = 'block';
-            } else {
-                imgContainer.style.display = 'none';
-            }
-            
-            // Actualizar contador
-            actualizarContadorSorteo();
-            
-            // Actualizar grid de números
+        function searchNumbers() {
+    const searchTerm = document.getElementById('numberSearch').value.trim();
+    if (!searchTerm) { return clearSearch(); }
+    
+    const items = document.querySelectorAll('.number-item');
+    items.forEach(item => {
+        const num = item.id.replace('num-', '');
+        if (num.includes(searchTerm)) {
+            item.style.display = 'flex'; // Mostrar coincidencias
+            item.classList.add('highlighted');
+        } else {
+            item.style.display = 'none'; // Ocultar el resto
+        }
+    });
+}
+
+        
+        function clearSearch() {
+            document.getElementById('numberSearch').value = '';
+            lastSearchTerm = '';
+            highlightedNumbers.forEach(num => {
+                const element = document.getElementById(`num-${num}`);
+                if (element) element.classList.remove('highlighted');
+            });
+            highlightedNumbers = [];
+            document.getElementById('searchResultsInfo').classList.add('hidden');
             initGrid();
-            
-            // Actualizar panel admin si está visible
-            if (document.getElementById('view-admin-panel') && !document.getElementById('view-admin-panel').classList.contains('hidden')) {
-                updateAdminPanel();
-            }
         }
         
         function initGrid() {
@@ -2851,1208 +1761,617 @@ const app = initializeApp(firebaseConfig);
                 div.textContent = n;
                 div.onclick = () => toggleNumber(n);
                 
-                // Agregar badge si está apartado
-                if (window.db.soldNumbers[n] && !window.db.soldNumbers[n].pagado) {
+                if (window.db.soldNumbers[n]) {
                     const badge = document.createElement('span');
                     badge.className = 'number-badge';
-                    badge.textContent = 'A';
+                    badge.textContent = window.db.soldNumbers[n].pagado ? 'P' : 'A';
                     div.appendChild(badge);
                 }
                 
                 grid.appendChild(div);
             }
-            
-            updateSelectionSummary();
         }
         
-        function toggleNumber(num) {
-            const index = selected.indexOf(num);
-            const element = document.getElementById(`num-${num}`);
-            
-            // Si el número ya está pagado, no hacer nada
-            if (window.db.soldNumbers[num] && window.db.soldNumbers[num].pagado) {
-                showNotification("Este número ya está pagado", "warning");
+        function toggleNumber(n) {
+            if(window.db.soldNumbers[n] && window.db.soldNumbers[n].pagado) {
+                showNotification("Este número ya está pagado", "error");
                 return;
             }
             
-            // Si está apartado por otro usuario, no hacer nada
-            if (window.db.soldNumbers[num] && !window.db.soldNumbers[num].pagado) {
-                showNotification("Este número está apartado", "warning");
-                return;
-            }
-            
-            if (index === -1) {
-                // Agregar si no está seleccionado y hay espacio
-                if (selected.length >= SECURITY_CONFIG.MAX_NUMBERS_PER_TRANSACTION) {
-                    showNotification(`Máximo ${SECURITY_CONFIG.MAX_NUMBERS_PER_TRANSACTION} números por transacción`, "warning");
+            const idx = selected.indexOf(n);
+            if(idx > -1) {
+                selected.splice(idx, 1);
+            } else {
+                if(selected.length >= 20) {
+                    showNotification("Máximo 20 números por transacción", "warning");
                     return;
                 }
-                selected.push(num);
-                element.classList.add('selected');
-            } else {
-                // Remover si ya está seleccionado
-                selected.splice(index, 1);
-                element.classList.remove('selected');
-            }
-            
-            updateSelectionSummary();
-        }
-        
-        function updateSelectionSummary() {
-            const summaryEl = document.getElementById('selectionSummary');
-            const badgeEl = document.getElementById('selectedCountBadge');
-            
-            if (selected.length === 0) {
-                summaryEl.innerHTML = `
-                    <div style="font-size: 0.9rem; color: var(--text-secondary);">
-                        <i class="fas fa-info-circle"></i> Selecciona tus números
-                    </div>
-                `;
-                badgeEl.style.display = 'none';
-            } else {
-                const total = selected.length * window.db.price;
-                summaryEl.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <div>
-                            <div style="color: white; font-weight: 600; font-size: 1.1rem;">
-                                ${selected.length} número${selected.length !== 1 ? 's' : ''} seleccionado${selected.length !== 1 ? 's' : ''}
-                            </div>
-                            <div style="color: var(--text-secondary); font-size: 0.85rem;">
-                                ${selected.sort().join(', ')}
-                            </div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="color: var(--warning); font-size: 0.9rem;">Total:</div>
-                            <div style="color: white; font-weight: 800; font-size: 1.3rem;">
-                                $${total.toLocaleString('es-CO')}
-                            </div>
-                        </div>
-                    </div>
-                `;
-                badgeEl.textContent = selected.length;
-                badgeEl.style.display = 'inline-block';
-            }
-        }
-        
-        function selectRandom(count) {
-            if (selected.length >= SECURITY_CONFIG.MAX_NUMBERS_PER_TRANSACTION) {
-                showNotification(`Máximo ${SECURITY_CONFIG.MAX_NUMBERS_PER_TRANSACTION} números por transacción`, "warning");
-                return;
-            }
-            
-            const disponibles = [];
-            for(let i = 0; i < TOTAL_NUMBERS; i++) {
-                const n = i.toString().padStart(3, '0');
-                if (!selected.includes(n) && 
-                    (!window.db.soldNumbers[n] || 
-                     (window.db.soldNumbers[n] && window.db.soldNumbers[n].pagado === false))) {
-                    disponibles.push(n);
-                }
-            }
-            
-            if (disponibles.length === 0) {
-                showNotification("No hay números disponibles", "warning");
-                return;
-            }
-            
-            const remainingSlots = SECURITY_CONFIG.MAX_NUMBERS_PER_TRANSACTION - selected.length;
-            const toSelect = Math.min(count, remainingSlots, disponibles.length);
-            
-            // Mezclar array
-            for (let i = disponibles.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [disponibles[i], disponibles[j]] = [disponibles[j], disponibles[i]];
-            }
-            
-            // Seleccionar los primeros 'toSelect'
-            const nuevos = disponibles.slice(0, toSelect);
-            nuevos.forEach(n => {
-                if (!selected.includes(n)) {
-                    selected.push(n);
-                    const element = document.getElementById(`num-${n}`);
-                    if (element) element.classList.add('selected');
-                }
-            });
-            
-            updateSelectionSummary();
-            showNotification(`${toSelect} números seleccionados aleatoriamente`, "success");
-        }
-        
-        function clearSelection() {
-            selected.forEach(n => {
+                selected.push(n);
+                
+                // Efecto visual
                 const element = document.getElementById(`num-${n}`);
-                if (element) element.classList.remove('selected');
-            });
-            selected = [];
-            updateSelectionSummary();
-            showNotification("Selección limpiada", "info");
-        }
-        
-        function searchNumbers() {
-            const searchTerm = document.getElementById('numberSearch').value.trim();
-            const resultsInfo = document.getElementById('searchResultsInfo');
-            
-            if (!searchTerm) {
-                clearSearch();
-                return;
-            }
-            
-            if (!/^\d{1,3}$/.test(searchTerm)) {
-                resultsInfo.innerHTML = "Ingresa solo números (1-3 dígitos)";
-                resultsInfo.classList.remove('hidden');
-                return;
-            }
-            
-            lastSearchTerm = searchTerm;
-            highlightedNumbers = [];
-            let count = 0;
-            
-            for (let i = 0; i < TOTAL_NUMBERS; i++) {
-                const num = i.toString().padStart(3, '0');
-                const element = document.getElementById(`num-${num}`);
-                
                 if (element) {
-                    if (num.includes(searchTerm)) {
-                        element.classList.add('highlighted');
-                        highlightedNumbers.push(num);
-                        count++;
-                        
-                        if (count === 1) {
-                            setTimeout(() => {
-                                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            }, 150);
-                        }
-                    } else {
-                        element.classList.remove('highlighted');
-                    }
+                    element.classList.add('number-pop');
+                    setTimeout(() => element.classList.remove('number-pop'), 500);
                 }
             }
-            
-            if (count > 0) {
-                resultsInfo.innerHTML = `🔍 Encontrados ${count} número(s) que contienen "${searchTerm}"`;
-                resultsInfo.classList.remove('hidden');
-            } else {
-                resultsInfo.innerHTML = `❌ No se encontraron números que contengan "${searchTerm}"`;
-                resultsInfo.classList.remove('hidden');
-            }
-        }
-        
-        function clearSearch() {
-            document.getElementById('numberSearch').value = '';
-            lastSearchTerm = '';
-            highlightedNumbers.forEach(num => {
-                const element = document.getElementById(`num-${num}`);
-                if (element) element.classList.remove('highlighted');
-            });
-            highlightedNumbers = [];
-            document.getElementById('searchResultsInfo').classList.add('hidden');
-            initGrid();
-        }
-        
-        function validateAndReserve() {
-            // Obtener datos del formulario
-            const nombre = document.getElementById('uNombre').value.trim();
-            const ciudad = document.getElementById('uCiudad').value.trim();
-            const celular = document.getElementById('uCelular').value.trim();
-            
-            // Validación completa
-            const validation = validateCompleteReservation(nombre, ciudad, celular, selected);
-            
-            if (!validation.isValid) {
-                // Mostrar errores
-                let errorMessage = "Errores encontrados:\n";
-                validation.errors.forEach((error, index) => {
-                    errorMessage += `${index + 1}. ${error}\n`;
-                });
-                
-                if (validation.warnings.length > 0) {
-                    errorMessage += "\nAdvertencias:\n";
-                    validation.warnings.forEach((warning, index) => {
-                        errorMessage += `${index + 1}. ${warning}\n`;
-                    });
-                }
-                
-                showNotification(errorMessage, "error", 6000);
-                return;
-            }
-            
-            // Mostrar advertencias si las hay
-            if (validation.warnings.length > 0) {
-                let warningMessage = "Advertencias:\n";
-                validation.warnings.forEach((warning, index) => {
-                    warningMessage += `${index + 1}. ${warning}\n`;
-                });
-                showNotification(warningMessage, "warning", 5000);
-            }
-            
-            // Guardar datos para la reserva
-            currentReservationData = {
-                nombre: nombre,
-                ciudad: ciudad,
-                celular: validation.celularFormateado,
-                numeros: validation.numerosLimpios,
-                total: validation.numerosLimpios.length * window.db.price,
-                timestamp: validation.timestamp
-            };
-            
-            // Verificar WhatsApp configurado
-            if (!WHATSAPP_NUMBER) {
-                showNotification("WhatsApp no configurado. Contacta al administrador.", "error");
-                return;
-            }
-            
-            // Mostrar modal de confirmación de WhatsApp
-            showWhatsAppConfirmation();
-        }
-        
-        function showWhatsAppConfirmation() {
-            if (!currentReservationData) return;
-            
-            const detailsEl = document.getElementById('whatsappDetails');
-            const numerosStr = currentReservationData.numeros.join(', ');
-            
-            detailsEl.innerHTML = `
-                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-bottom: 15px;">
-                    <div style="color: white; margin-bottom: 10px; font-weight: 600;">Resumen de tu reserva:</div>
-                    <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px;">
-                        <strong>Nombre:</strong> ${currentReservationData.nombre}
-                    </div>
-                    <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px;">
-                        <strong>Números:</strong> ${numerosStr}
-                    </div>
-                    <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px;">
-                        <strong>Total:</strong> $${currentReservationData.total.toLocaleString('es-CO')}
-                    </div>
-                    <div style="color: var(--text-secondary); font-size: 0.9rem;">
-                        <strong>Celular:</strong> ${currentReservationData.celular}
-                    </div>
-                </div>
-                <div style="color: var(--text-secondary); font-size: 0.85rem; text-align: center;">
-                    Se abrirá WhatsApp para confirmar tu reserva
-                </div>
-            `;
-            
-            openModal('whatsappConfirmationModal');
-        }
-        
-        function sendWhatsAppReservation() {
-            if (!currentReservationData || !WHATSAPP_NUMBER) {
-                showNotification("Error en los datos de reserva", "error");
-                return;
-            }
-            
-            const numerosStr = currentReservationData.numeros.join(', ');
-            const totalFormatted = currentReservationData.total.toLocaleString('es-CO');
-            
-            // Crear mensaje de WhatsApp
-            let mensaje = `Hola, quiero reservar los siguientes números para el sorteo:\n\n`;
-            mensaje += `*Nombre:* ${currentReservationData.nombre}\n`;
-            mensaje += `*Ciudad:* ${currentReservationData.ciudad}\n`;
-            mensaje += `*Celular:* ${currentReservationData.celular}\n`;
-            mensaje += `*Números:* ${numerosStr}\n`;
-            mensaje += `*Total:* $${totalFormatted}\n\n`;
-            mensaje += `Por favor confírmame la disponibilidad y los datos para el pago.`;
-            
-            // Codificar mensaje para URL
-            const mensajeCodificado = encodeURIComponent(mensaje);
-            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${mensajeCodificado}`;
-            
-            // Registrar transacción exitosa
-            logSuccessfulTransaction(
-                currentReservationData.celular, 
-                currentReservationData.numeros, 
-                'whatsapp_reservation'
-            );
-            
-            // Abrir WhatsApp
-            window.open(whatsappUrl, '_blank');
-            
-            // Cerrar modal
-            closeModal('whatsappConfirmationModal');
-            
-            // Mostrar confirmación
-            showNotification("WhatsApp abierto. Completa la reserva enviando el mensaje.", "success", 5000);
-            
-            // Limpiar selección
-            clearSelection();
-            
-            // Limpiar formulario
-            document.getElementById('uNombre').value = '';
-            document.getElementById('uCiudad').value = '';
-            document.getElementById('uCelular').value = '';
-            
-            // Limpiar datos de reserva
-            currentReservationData = null;
-        }
-        
-        function showPaymentOptions() {
-            if (!currentReservationData) {
-                showNotification("Primero debes completar tus datos y seleccionar números", "warning");
-                return;
-            }
-            
-            const summaryEl = document.getElementById('paymentSummary');
-            const numerosStr = currentReservationData.numeros.join(', ');
-            
-            summaryEl.innerHTML = `
-                <div style="color: white; margin-bottom: 8px; font-weight: 600;">Detalles:</div>
-                <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px;">
-                    <strong>Números:</strong> ${numerosStr}
-                </div>
-                <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px;">
-                    <strong>Cantidad:</strong> ${currentReservationData.numeros.length} números
-                </div>
-                <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px;">
-                    <strong>Valor unitario:</strong> $${window.db.price.toLocaleString('es-CO')}
-                </div>
-                <div style="color: var(--success); font-size: 1.1rem; font-weight: 800; margin-top: 10px;">
-                    TOTAL: $${currentReservationData.total.toLocaleString('es-CO')}
-                </div>
-            `;
-            
-            selectedPaymentMethod = null;
-            document.getElementById('paymentDetails').style.display = 'none';
-            openModal('paymentModal');
-        }
-        
-        function selectPaymentMethod(method) {
-            selectedPaymentMethod = method;
-            
-            // Remover selección de todos los métodos
-            document.querySelectorAll('.payment-method').forEach(el => {
-                el.classList.remove('selected');
-            });
-            
-            // Agregar selección al método clickeado
-            event.currentTarget.classList.add('selected');
-            
-            // Mostrar detalles del método seleccionado
-            const detailsEl = document.getElementById('paymentDetails');
-            const titleEl = document.getElementById('paymentMethodTitle');
-            const instructionsEl = document.getElementById('paymentInstructions');
-            
-            detailsEl.style.display = 'block';
-            
-            let title = '';
-            let instructions = '';
-            
-            switch(method) {
-                case 'transfer':
-                    title = 'Transferencia Bancaria';
-                    instructions = `
-                        <div style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
-                            <p><strong>Banco:</strong> Bancolombia</p>
-                            <p><strong>Titular:</strong> SB DINÁMICAS S.A.S.</p>
-                            <p><strong>Cuenta:</strong> 123-456789-12</p>
-                            <p><strong>Tipo:</strong> Cuenta de Ahorros</p>
-                            <p style="margin-top: 10px; color: var(--warning);">
-                                <i class="fas fa-exclamation-circle"></i> 
-                                Envíanos el comprobante por WhatsApp al finalizar.
-                            </p>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'nequi':
-                    title = 'Nequi';
-                    instructions = `
-                        <div style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
-                            <p><strong>Número:</strong> 300 123 4567</p>
-                            <p><strong>Nombre:</strong> SB DINÁMICAS</p>
-                            <p style="margin-top: 10px; color: var(--warning);">
-                                <i class="fas fa-exclamation-circle"></i> 
-                                Envíanos el comprobante por WhatsApp al finalizar.
-                            </p>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'daviplata':
-                    title = 'DaviPlata';
-                    instructions = `
-                        <div style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
-                            <p><strong>Número:</strong> 300 123 4567</p>
-                            <p><strong>Nombre:</strong> SB DINÁMICAS</p>
-                            <p style="margin-top: 10px; color: var(--warning);">
-                                <i class="fas fa-exclamation-circle"></i> 
-                                Envíanos el comprobante por WhatsApp al finalizar.
-                            </p>
-                        </div>
-                    `;
-                    break;
-                    
-                case 'efecty':
-                    title = 'Efecty';
-                    instructions = `
-                        <div style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
-                            <p><strong>Documento:</strong> 123456789</p>
-                            <p><strong>Nombre:</strong> SB DINÁMICAS</p>
-                            <p><strong>Referencia:</strong> SORTEO-${Date.now().toString().slice(-6)}</p>
-                            <p style="margin-top: 10px; color: var(--warning);">
-                                <i class="fas fa-exclamation-circle"></i> 
-                                Guarda el recibo y envíanos la foto por WhatsApp.
-                            </p>
-                        </div>
-                    `;
-                    break;
-            }
-            
-            titleEl.textContent = title;
-            instructionsEl.innerHTML = instructions;
-        }
-        
-        function confirmPayment() {
-            if (!selectedPaymentMethod) {
-                showNotification("Selecciona un método de pago", "warning");
-                return;
-            }
-            
-            if (!currentReservationData) {
-                showNotification("Error en los datos de reserva", "error");
-                return;
-            }
-            
-            // Marcar números como apartados en la base de datos
-            const timestamp = Date.now();
-            const reservationId = 'reserva-' + timestamp;
-            
-            currentReservationData.numeros.forEach(num => {
-                window.db.soldNumbers[num] = {
-                    nombre: currentReservationData.nombre,
-                    ciudad: currentReservationData.ciudad,
-                    celular: currentReservationData.celular,
-                    numeros: currentReservationData.numeros,
-                    total: currentReservationData.total,
-                    pagado: false,
-                    metodo: selectedPaymentMethod,
-                    timestamp: timestamp,
-                    reservaId: reservationId,
-                    expira: timestamp + (24 * 60 * 60 * 1000) // 24 horas
-                };
-            });
-            
-            // Guardar cambios
-            save();
-            
-            // Registrar transacción
-            logSuccessfulTransaction(
-                currentReservationData.celular,
-                currentReservationData.numeros,
-                'payment_initiated'
-            );
-            
-            // Sincronizar con Firebase si está disponible
-            if (isFirebaseReady) {
-                saveToFirebase();
-            }
-            
-            // Cerrar modal
-            closeModal('paymentModal');
-            
-            // Mostrar confirmación
-            showNotification(
-                `Reserva confirmada por $${currentReservationData.total.toLocaleString('es-CO')}. ` +
-                `Tienes 24 horas para realizar el pago.`,
-                "success",
-                6000
-            );
-            
-            // Enviar notificación automática si está configurada
-            sendAutoNotification('reserva');
-            
-            // Limpiar selección
-            clearSelection();
-            
-            // Limpiar formulario
-            document.getElementById('uNombre').value = '';
-            document.getElementById('uCiudad').value = '';
-            document.getElementById('uCelular').value = '';
-            
-            // Limpiar datos de reserva
-            currentReservationData = null;
-            
-            // Actualizar UI
             updateUI();
         }
         
-        function sendAutoNotification(type) {
-            if (!currentReservationData || !WHATSAPP_NUMBER) return;
+        function selectRandom(qty) {
+            if(selected.length >= 20) {
+                showNotification("Máximo 20 números permitidos", "warning");
+                return;
+            }
             
-            let mensaje = '';
-            const numerosStr = currentReservationData.numeros.join(', ');
-            const totalFormatted = currentReservationData.total.toLocaleString('es-CO');
-            
-            // Usar plantillas guardadas o predeterminadas
-            if (window.db.notifications && window.db.notifications[type]) {
-                mensaje = window.db.notifications[type]
-                    .replace('{numeros}', numerosStr)
-                    .replace('{total}', totalFormatted)
-                    .replace('{nombre}', currentReservationData.nombre);
-            } else {
-                // Mensajes predeterminados
-                switch(type) {
-                    case 'reserva':
-                        mensaje = `✅ Reserva confirmada para ${currentReservationData.nombre}. Números: ${numerosStr}. Total: $${totalFormatted}. Tienes 24 horas para realizar el pago.`;
-                        break;
-                    case 'pago':
-                        mensaje = `🎉 ¡Pago confirmado! Tus números ${numerosStr} están oficialmente registrados. ¡Buena suerte!`;
-                        break;
-                    case 'recordatorio':
-                        mensaje = `⏰ Recordatorio: Tienes pendiente el pago de ${currentReservationData.numeros.length} números. Total: $${totalFormatted}.`;
-                        break;
+            let libres = [];
+            for(let i = 0; i < TOTAL_NUMBERS; i++) {
+                const n = i.toString().padStart(3, '0');
+                if(!window.db.soldNumbers[n] && !selected.includes(n)) {
+                    libres.push(n);
                 }
             }
             
-            // Crear URL de WhatsApp
-            const mensajeCodificado = encodeURIComponent(mensaje);
-            const whatsappUrl = `https://wa.me/${currentReservationData.celular}?text=${mensajeCodificado}`;
-            
-            // Abrir WhatsApp en nueva pestaña (simulado para este ejemplo)
-            // producción, esto podría manejarse de forma diferente
-            console.log("Notificación automática:", mensaje);
-            console.log("URL:", whatsappUrl);
-            
-            // Aquí podrías implementar envío automático real si tienes un servidor
-            // Por ahora solo mostramos el mensaje
-            if (type === 'reserva') {
-                showNotification("Notificación de reserva enviada al participante", "success");
+            if(libres.length === 0) {
+                showNotification("¡Todos los números están ocupados!", "error");
+                return;
             }
+            
+            const espacio = 20 - selected.length;
+            const finalQty = Math.min(qty, espacio, libres.length);
+            
+            libres.sort(() => Math.random() - 0.5);
+            
+            for(let i = 0; i < finalQty; i++) {
+                const num = libres[i];
+                setTimeout(() => {
+                    if(!selected.includes(num)) {
+                        selected.push(num);
+                        updateUI();
+                        const el = document.getElementById(`num-${num}`);
+                        if(el) {
+                            el.classList.add('selected');
+                            el.classList.add('number-pop');
+                        }
+                    }
+                }, i * 100);
+            }
+            
+            showNotification(`Seleccionados ${finalQty} números al azar`, "success");
         }
-
-        // =============================================
-        // PANEL ADMINISTRADOR
-        // =============================================
         
-    function adminLogin() {
-    const email = document.getElementById('adminEmail').value.trim();
-    const password = document.getElementById('adminPass').value;
-    const spinner = document.getElementById('loginSpinner');
-    const loginText = document.getElementById('loginText');
-    
-    // Validación básica
-    if (!email || !password) {
-        showNotification("Ingresa correo y contraseña", "error");
-        return;
-    }
-    
-    // Verificar que Firebase esté disponible
-    if (!isFirebaseReady || !auth) {
-        showNotification("Firebase no está disponible. Verifica la configuración.", "error");
-        console.error("Firebase no inicializado:", { isFirebaseReady, auth });
-        return;
-    }
-    
-    // Mostrar loading
-    loginText.textContent = "Iniciando sesión...";
-    spinner.classList.remove('hidden');
-    
-    // Autenticar con Firebase Authentication (SEGURO)
-    auth.signInWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-            // Login exitoso
-            currentUser = userCredential.user;
-            window.db.isAdmin = true;
-            save();
+        function clearSelection() {
+            selected = [];
+            updateUI();
+            showNotification("Selección limpiada", "info");
+        }
+        
+        function updateUI() {
+            // Actualizar información del premio
+            document.getElementById('displayPrizeTitle').textContent = window.db.prize || "Sorteo";
+            document.getElementById('displayPrizeDesc').textContent = window.db.desc || "";
+            document.getElementById('displayPrice').textContent = (window.db.price || 0).toLocaleString('es-CO');
             
-            console.log("✅ Admin autenticado:", currentUser.email);
-            
-            showTab('admin-panel');
-            loadFirebaseData();
-            showNotification("Bienvenido Administrador", "success");
-            
-            // Restaurar botón
-            loginText.textContent = "Entrar al Panel";
-            spinner.classList.add('hidden');
-        })
-        .catch((error) => {
-            // Login fallido
-            console.error("❌ Firebase auth error:", error);
-            
-            let errorMessage = "Credenciales incorrectas";
-            
-            // Mensajes de error específicos según el código
-            switch(error.code) {
-                case 'auth/user-not-found':
-                    errorMessage = "❌ Usuario no encontrado. Verifica el correo.";
-                    break;
-                case 'auth/wrong-password':
-                    errorMessage = "❌ Contraseña incorrecta.";
-                    break;
-                case 'auth/invalid-email':
-                    errorMessage = "❌ Formato de correo inválido.";
-                    break;
-                case 'auth/user-disabled':
-                    errorMessage = "❌ Esta cuenta ha sido deshabilitada.";
-                    break;
-                case 'auth/too-many-requests':
-                    errorMessage = "⚠️ Demasiados intentos fallidos. Intenta en unos minutos.";
-                    break;
-                case 'auth/network-request-failed':
-                    errorMessage = "🌐 Error de conexión. Verifica tu internet.";
-                    break;
-                case 'auth/invalid-credential':
-                    errorMessage = "❌ Credenciales inválidas. Verifica correo y contraseña.";
-                    break;
+            // Mostrar/ocultar imagen
+            const imgContainer = document.getElementById('prizeImageContainer');
+            const imgEl = document.getElementById('displayPrizeImg');
+            if(window.db.img) {
+                imgEl.src = window.db.img;
+                imgContainer.style.display = 'block';
+            } else {
+                imgContainer.style.display = 'none';
             }
             
-            showNotification(errorMessage, "error", 5000);
-            logFailedAttempt(`Intento de login fallido: ${error.code} - ${email}`);
-            
-            // Restaurar botón
-            loginText.textContent = "Entrar al Panel";
-            spinner.classList.add('hidden');
-        });
-}
-        
-        function adminLogout() {
-            window.db.isAdmin = false;
-            save();
-            
-            // Cerrar sesión de Firebase si está autenticado
-            if (auth && currentUser) {
-                auth.signOut();
-                currentUser = null;
+            // Actualizar grid
+            if (!lastSearchTerm) {
+                initGrid();
+            } else {
+                for(let i = 0; i < TOTAL_NUMBERS; i++) {
+                    const n = i.toString().padStart(3, '0');
+                    const element = document.getElementById(`num-${n}`);
+                    if (element) {
+                        element.classList.remove('selected', 'apartado', 'pagado');
+                        if (selected.includes(n)) {
+                            element.classList.add('selected');
+                        } else if (window.db.soldNumbers[n]) {
+                            element.classList.add(window.db.soldNumbers[n].pagado ? 'pagado' : 'apartado');
+                        }
+                    }
+                }
             }
             
-            showTab('user');
-            showNotification("Sesión cerrada", "info");
+            // Actualizar resumen de selección
+            const summaryEl = document.getElementById('selectionSummary');
+            const countBadge = document.getElementById('selectedCountBadge');
+            if(selected.length > 0) {
+                const total = selected.length * window.db.price;
+                summaryEl.innerHTML = `
+                    <div style="font-size: 1.1rem; color: white; margin-bottom: 8px;">
+                        <strong>${selected.length} número(s) seleccionado(s)</strong>
+                    </div>
+                    <div style="color: var(--text-secondary); margin-bottom: 12px; font-size: 0.9rem;">
+                        ${selected.join(', ')}
+                    </div>
+                    <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), transparent); padding: 15px; border-radius: 12px; border: 1px solid rgba(99, 102, 241, 0.3);">
+                        <div style="font-size: 1.8rem; font-weight: 800; color: var(--success);">
+                            ${formatMoney(total)}
+                        </div>
+                        <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                            Total a pagar
+                        </div>
+                    </div>
+                `;
+                countBadge.textContent = selected.length;
+                countBadge.style.display = 'inline-block';
+            } else {
+                summaryEl.innerHTML = `
+                    <div style="color: var(--text-secondary); font-size: 0.95rem;">
+                        <i class="fas fa-mouse-pointer"></i> Haz clic en los números para seleccionarlos
+                    </div>
+                `;
+                countBadge.style.display = 'none';
+            }
+            
+            // Agregar contador de sorteo
+            actualizarContadorSorteo();
+            
+            // ESTADÍSTICAS ADMIN
+            if(document.getElementById('view-admin-panel') && 
+               !document.getElementById('view-admin-panel').classList.contains('hidden')) {
+                updateAdminPanel();
+            }
         }
         
         function updateAdminPanel() {
-            if (!window.db.isAdmin) return;
-            
-            // Calcular estadísticas
             let totalRecaudado = 0;
             let totalPendiente = 0;
-            let vendidos = 0;
-            let pagados = 0;
-            const participantes = new Set();
+            let soldCount = Object.keys(window.db.soldNumbers).length;
             
-            Object.values(window.db.soldNumbers).forEach(venta => {
-                if (venta.pagado) {
-                    totalRecaudado += venta.total || (1 * window.db.price);
-                    pagados++;
+            const table = document.getElementById('salesTable');
+            const searchTerm = document.getElementById('adminSearch')?.value?.toLowerCase() || '';
+            table.innerHTML = '';
+            
+            // Ordenar números
+            const sortedNumbers = Object.keys(window.db.soldNumbers).sort((a, b) => parseInt(a) - parseInt(b));
+            
+            sortedNumbers.forEach(n => {
+                const u = window.db.soldNumbers[n];
+                const match = n.includes(searchTerm) || 
+                             u.nombre.toLowerCase().includes(searchTerm) || 
+                             u.ciudad.toLowerCase().includes(searchTerm);
+                
+                if(u.pagado) {
+                    totalRecaudado += window.db.price;
                 } else {
-                    totalPendiente += venta.total || (1 * window.db.price);
+                    totalPendiente += window.db.price;
                 }
-                vendidos++;
-                participantes.add(venta.celular);
+                
+                if(match) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><b>${escapeHTML(n)}</b></td>
+                        <td>
+                            <div style="font-weight: 600; color: white;">${escapeHTML(u.nombre)}</div>
+                            <div style="color: var(--text-secondary); font-size: 0.85rem;">
+                                <i class="fas fa-map-marker-alt"></i> ${escapeHTML(u.ciudad)}
+                                <span style="margin: 0 8px;">•</span>
+                                <i class="fas fa-phone"></i> ${escapeHTML(u.celular)}
+                            </div>
+                            <div style="color: #64748b; font-size: 0.75rem; margin-top: 4px;">
+                                <i class="fas fa-calendar"></i> ${new Date(u.fecha).toLocaleDateString('es-CO')}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge ${u.pagado?'bg-paid':'bg-wait'}">
+                                ${u.pagado?'PAGADO':'PENDIENTE'}
+                            </span>
+                        </td>
+                        <td>
+                            <div style="display:flex; gap:10px;">
+                                <button onclick="sendWhatsAppCobro('${n}')" title="Enviar mensaje" style="color:#fbbf24; background:none; border:none; cursor:pointer; padding: 8px; border-radius: 8px; background: rgba(251, 191, 36, 0.1);">
+                                    <i class="fab fa-whatsapp"></i>
+                                </button>
+                                <button onclick="togglePaid('${n}')" title="${u.pagado?'Marcar pendiente':'Marcar pagado'}" style="color:#22c55e; background:none; border:none; cursor:pointer; padding: 8px; border-radius: 8px; background: rgba(34, 197, 94, 0.1);">
+                                    <i class="fas fa-check-circle"></i>
+                                </button>
+                                <button onclick="deleteEntry('${n}')" title="Eliminar" style="color:#f43f5e; background:none; border:none; cursor:pointer; padding: 8px; border-radius: 8px; background: rgba(244, 63, 94, 0.1);">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    table.appendChild(row);
+                }
             });
             
             // Actualizar estadísticas
-            document.getElementById('statRecaudado').textContent = `$${totalRecaudado.toLocaleString('es-CO')}`;
-            document.getElementById('statPendiente').textContent = `$${totalPendiente.toLocaleString('es-CO')}`;
-            document.getElementById('statVendidos').textContent = `${vendidos}/${TOTAL_NUMBERS}`;
-            document.getElementById('statParticipantes').textContent = participantes.size;
+            document.getElementById('statRecaudado').textContent = formatMoney(totalRecaudado);
+            document.getElementById('statPendiente').textContent = formatMoney(totalPendiente);
             
-            // Actualizar barra de progreso
-            const porcentaje = (vendidos / TOTAL_NUMBERS) * 100;
-            document.getElementById('progFill').style.width = `${porcentaje}%`;
+            const progressPercentage = (soldCount / TOTAL_NUMBERS) * 100;
+            document.getElementById('progFill').style.width = progressPercentage + '%';
             document.getElementById('progText').textContent = 
-                `${vendidos}/${TOTAL_NUMBERS} (${porcentaje.toFixed(1)}%)`;
-            
-            // Actualizar tabla
-            updateAdminTable();
-            
-            // Actualizar panel de seguridad
-            updateSecurityPanel();
+                `${soldCount}/${TOTAL_NUMBERS} (${Math.round(progressPercentage)}%)`;
         }
         
-        function updateAdminTable() {
-            const tableBody = document.getElementById('salesTable');
-            const searchTerm = document.getElementById('adminSearch').value.toLowerCase();
+        function sendWhatsApp() {
+    if (!WHATSAPP_NUMBER || !isValidWhatsAppNumber(WHATSAPP_NUMBER)) {
+        alert("WhatsApp no configurado");
+        return;
+    }
+
+    const nom = document.getElementById('uNombre').value.trim();
+    const ciu = document.getElementById('uCiudad').value.trim();
+    let cel = document.getElementById('uCelular').value.trim();
+
+    if (!nom || !ciu || !cel || selected.length === 0) {
+        alert("Completa tus datos y selecciona números");
+        return;
+    }
+
+    cel = cel.replace(/\D/g, '');
+
+    const total = selected.length * window.db.price;
+
+    // 🔥 MENSAJE OPTIMIZADO (CORTO = NO FALLA)
+    const msg = encodeURIComponent(
+        `RESERVA SB DINÁMICAS\n\n` +
+        `Nombre: ${nom}\n` +
+        `Ciudad: ${ciu}\n` +
+        `Cel: ${cel}\n\n` +
+        `Numeros: ${selected.join(', ')}\n` +
+        `Total: ${formatMoney(total)}`
+    );
+
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
+
+    // ✅ MÉTODO DEFINITIVO (NO BLOQUEABLE)
+    const wa = document.getElementById('waSender');
+    wa.href = url;
+    wa.click();
+
+    // 🟢 GUARDAR DESPUÉS
+    const fecha = new Date().toISOString();
+    selected.forEach(n => {
+        if (!window.db.soldNumbers[n]) {
+            window.db.soldNumbers[n] = {
+                nombre: nom,
+                ciudad: ciu,
+                celular: cel,
+                pagado: false,
+                fecha: fecha
+            };
+        }
+    });
+
+    save();
+    selected = [];
+    updateUI();
+}
+        
+        function uploadImg(input) {
+            if (!input.files || !input.files[0]) return;
             
-            if (!tableBody) return;
+            const file = input.files[0];
             
-            tableBody.innerHTML = '';
-            
-            // Convertir soldNumbers a array y ordenar
-            const ventasArray = Object.entries(window.db.soldNumbers)
-                .map(([numero, datos]) => ({ numero, ...datos }))
-                .sort((a, b) => b.timestamp - a.timestamp);
-            
-            // Filtrar por búsqueda
-            const ventasFiltradas = ventasArray.filter(venta => {
-                if (!searchTerm) return true;
-                
-                return venta.numero.includes(searchTerm) ||
-                       venta.nombre.toLowerCase().includes(searchTerm) ||
-                       venta.ciudad.toLowerCase().includes(searchTerm) ||
-                       venta.celular.includes(searchTerm);
-            });
-            
-            // Limitar a 100 resultados para rendimiento
-            const ventasMostrar = ventasFiltradas.slice(0, 100);
-            
-            if (ventasMostrar.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 40px;">
-                            ${searchTerm ? 'No se encontraron resultados' : 'No hay ventas registradas'}
-                        </td>
-                    </tr>
-                `;
+            // Validar tamaño (5MB máximo)
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification("La imagen no debe superar 5MB", "error");
+                input.value = '';
                 return;
             }
             
-            // Agregar filas
-            ventasMostrar.forEach(venta => {
-                const row = document.createElement('tr');
-                
-                // Calcular tiempo restante si no está pagado
-                let tiempoRestante = '';
-                if (!venta.pagado && venta.expira) {
-                    const ahora = Date.now();
-                    const expira = venta.expira;
-                    
-                    if (ahora < expira) {
-                        const horas = Math.floor((expira - ahora) / (1000 * 60 * 60));
-                        const minutos = Math.floor((expira - ahora) / (1000 * 60)) % 60;
-                        tiempoRestante = `${horas}h ${minutos}m`;
-                    } else {
-                        tiempoRestante = 'EXPIRADO';
-                    }
-                }
-                
-                row.innerHTML = `
-                    <td style="font-weight: 800; color: white;">${venta.numero}</td>
-                    <td>
-                        <div style="color: white; font-weight: 600;">${venta.nombre}</div>
-                        <div style="color: var(--text-secondary); font-size: 0.8rem;">${venta.ciudad}</div>
-                    </td>
-                    <td style="color: var(--text-secondary);">${venta.celular}</td>
-                    <td>
-                        ${venta.pagado ? 
-                            '<span class="badge bg-paid">Pagado</span>' : 
-                            `<span class="badge bg-wait">Apartado</span>
-                             <div style="color: var(--warning); font-size: 0.7rem; margin-top: 4px;">
-                                <i class="fas fa-clock"></i> ${tiempoRestante}
-                             </div>`
-                        }
-                    </td>
-                    <td>
-                        ${!venta.pagado ? 
-                            `<button class="btn-quick" onclick="markAsPaid('${venta.numero}')" 
-                                     style="background: linear-gradient(135deg, var(--success), var(--success-dark)); color: white; border: none;">
-                                <i class="fas fa-check"></i> Pagado
-                            </button>` : 
-                            `<button class="btn-quick" onclick="markAsPending('${venta.numero}')"
-                                     style="background: linear-gradient(135deg, var(--warning), var(--warning-dark)); color: black; border: none;">
-                                <i class="fas fa-undo"></i> Pendiente
-                            </button>`
-                        }
-                        <button class="btn-quick" onclick="deleteSale('${venta.numero}')"
-                                style="background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: white; border: none; margin-left: 5px;">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                
-                tableBody.appendChild(row);
-            });
-        }
-        
-        function markAsPaid(numero) {
-            if (!window.db.soldNumbers[numero]) return;
-            
-            window.db.soldNumbers[numero].pagado = true;
-            window.db.soldNumbers[numero].fechaPago = new Date().toISOString();
-            save();
-            
-            // Sincronizar con Firebase si está disponible
-            if (isFirebaseReady && currentUser) {
-                saveToFirebase();
-            }
-            
-            updateAdminPanel();
-            initGrid(); // Actualizar grid de números
-            
-            // Enviar notificación automática
-            if (window.db.soldNumbers[numero].celular && window.db.notifications) {
-                // Simular envío de notificación
-                console.log("Notificación de pago enviada a:", window.db.soldNumbers[numero].celular);
-            }
-            
-            showNotification(`Número ${numero} marcado como pagado`, "success");
-        }
-        
-        function markAsPending(numero) {
-            if (!window.db.soldNumbers[numero]) return;
-            
-            window.db.soldNumbers[numero].pagado = false;
-            delete window.db.soldNumbers[numero].fechaPago;
-            save();
-            
-            // Sincronizar con Firebase si está disponible
-            if (isFirebaseReady && currentUser) {
-                saveToFirebase();
-            }
-            
-            updateAdminPanel();
-            initGrid();
-            showNotification(`Número ${numero} marcado como pendiente`, "warning");
-        }
-        
-        function deleteSale(numero) {
-            if (!confirm(`¿Estás seguro de eliminar la venta del número ${numero}?`)) {
+            // Validar tipo
+            if (!file.type.match('image.*')) {
+                showNotification("Solo se permiten imágenes", "error");
+                input.value = '';
                 return;
             }
             
-            delete window.db.soldNumbers[numero];
-            save();
+            const reader = new FileReader();
+            reader.onload = (e) => { 
+                window.db.img = e.target.result; 
+                save();
+                showNotification("Imagen cargada exitosamente", "success");
+            };
+            reader.onerror = () => {
+                showNotification("Error al cargar la imagen", "error");
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function togglePaid(n) {
+            if(!window.db.soldNumbers[n]) return;
             
-            // Sincronizar con Firebase si está disponible
-            if (isFirebaseReady && currentUser) {
-                saveToFirebase();
+            const nuevoEstado = !window.db.soldNumbers[n].pagado;
+            window.db.soldNumbers[n].pagado = nuevoEstado;
+            window.db.soldNumbers[n].fechaActualizacion = new Date().toISOString();
+            
+            save();
+            showNotification(
+                `Número ${n} ${nuevoEstado ? 'marcado como PAGADO' : 'marcado como PENDIENTE'}`,
+                nuevoEstado ? 'success' : 'warning'
+            );
+        }
+        
+        function deleteEntry(n) {
+            if(!window.db.soldNumbers[n]) return;
+            
+            if(confirm(`¿Liberar el número ${n}?\n\nCliente: ${window.db.soldNumbers[n].nombre}`)) {
+                delete window.db.soldNumbers[n];
+                save();
+                showNotification(`Número ${n} liberado`, "info");
+            }
+        }
+        
+        function saveConfig() {
+            const title = document.getElementById('setPrizeTitle').value.trim();
+            const desc = document.getElementById('setPrizeDesc').value.trim();
+            const price = parseInt(document.getElementById('setPrizePrice').value);
+            const statusEl = document.getElementById('configStatus');
+            
+            if(!title || !desc || !price || price < 1000) {
+                showStatus(statusEl, "Completa todos los campos con valores válidos", "error");
+                return;
             }
             
-            updateAdminPanel();
-            initGrid();
-            showNotification(`Venta del número ${numero} eliminada`, "success");
+            window.db.prize = escapeHTML(title);
+            window.db.desc = escapeHTML(desc);
+            window.db.price = price;
+            window.db.lastUpdate = new Date().toISOString();
+            
+            save();
+            showStatus(statusEl, "✅ Configuración guardada", "success");
+            showNotification("Configuración actualizada", "success");
+            
+            setTimeout(() => {
+                showTab('admin-panel');
+            }, 1500);
         }
         
         function clearAllData() {
-            if (!confirm("¿ESTÁS SEGURO? Esto eliminará TODOS los datos de ventas. Esta acción NO se puede deshacer.")) {
-                return;
+            if(confirm("⚠️ ¿RESETEAR TODOS LOS DATOS?\n\nEsta acción eliminará todas las reservas.\n\nEscribe 'RESET' para confirmar:")) {
+                const confirmacion = prompt("Escribe 'RESET' para confirmar:");
+                if(confirmacion === 'RESET') {
+                    window.db.soldNumbers = {};
+                    save();
+                    showNotification("Todos los datos han sido reseteados", "info");
+                } else {
+                    showNotification("Reset cancelado", "warning");
+                }
             }
-            
-            window.db.soldNumbers = {};
-            save();
-            
-            // Sincronizar con Firebase si está disponible
-            if (isFirebaseReady && currentUser) {
-                saveToFirebase();
+        }
+        
+        function forceSync() {
+            if (window.saveToFirestore && window.db.isAdmin) {
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<span class="spinner"></span> SINCRONIZANDO...';
+                btn.disabled = true;
+                
+                window.saveToFirestore()
+                    .then(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        showNotification("✅ Sincronizado con Firebase", "success");
+                    })
+                    .catch(err => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        showNotification("❌ Error sincronizando", "error");
+                        console.error("Firebase sync error:", err);
+                    });
+            } else {
+                showNotification("Inicia sesión como admin para sincronizar", "warning");
             }
-            
-            updateAdminPanel();
-            initGrid();
-            showNotification("Todos los datos han sido eliminados", "success");
         }
         
         function exportToExcel() {
-            // Crear datos para exportar
-            const data = [];
+            // Implementación básica de exportación
+            let csv = 'Número,Nombre,Ciudad,Celular,Estado,Fecha\n';
             
-            // Encabezados
-            data.push(['Número', 'Nombre', 'Ciudad', 'Celular', 'Estado', 'Total', 'Fecha', 'Método']);
-            
-            // Datos
-            Object.entries(window.db.soldNumbers).forEach(([numero, venta]) => {
-                data.push([
-                    numero,
-                    venta.nombre,
-                    venta.ciudad,
-                    venta.celular,
-                    venta.pagado ? 'Pagado' : 'Apartado',
-                    `$${(venta.total || window.db.price).toLocaleString('es-CO')}`,
-                    new Date(venta.timestamp).toLocaleDateString('es-CO'),
-                    venta.metodo || 'N/A'
-                ]);
+            Object.keys(window.db.soldNumbers).sort().forEach(n => {
+                const u = window.db.soldNumbers[n];
+                csv += `"${n}","${u.nombre}","${u.ciudad}","${u.celular}","${u.pagado?'PAGADO':'PENDIENTE'}","${u.fecha}"\n`;
             });
             
-            // Convertir a CSV
-            const csvContent = data.map(row => row.join(',')).join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
             
-            if (navigator.msSaveBlob) { // IE 10+
-                navigator.msSaveBlob(blob, 'ventas_sorteo.csv');
-            } else {
-                link.href = URL.createObjectURL(blob);
-                link.setAttribute('download', 'ventas_sorteo.csv');
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
+            link.setAttribute('href', url);
+            link.setAttribute('download', `sorteo_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
             
-            showNotification("Datos exportados a CSV", "success");
-        }
-        
-        function showInstructions() {
-            alert(`📖 INSTRUCCIONES SB DINÁMICAS
-
-1. SELECCIÓN DE NÚMEROS:
-   - Haz clic en los números que quieras reservar
-   - Máximo 20 números por transacción
-   - Usa el buscador para encontrar números específicos
-
-2. COMPLETAR DATOS:
-   - Ingresa tu nombre completo (nombre y apellido)
-   - Selecciona tu ciudad de la lista permitida
-   - Ingresa tu número de celular colombiano
-
-3. RESERVA:
-   - La reserva es válida por 24 horas
-   - Debes realizar el pago dentro de este tiempo
-   - Recibirás confirmación por WhatsApp
-
-4. PAGO:
-   - Selecciona tu método de pago preferido
-   - Sigue las instrucciones para completar el pago
-   - Envía el comprobante por WhatsApp
-
-5. CONFIRMACIÓN:
-   - Una vez confirmado el pago, tus números quedan registrados
-   - Recibirás notificación de confirmación
-
-⚠️ SEGURIDAD:
-   - Tus datos están protegidos
-   - Transacciones seguras
-   - Sistema anti-fraude implementado
-
-Para soporte, contacta al administrador del sorteo.`);
-        }
-
-        // =============================================
-        // PANEL DE SEGURIDAD
-        // =============================================
-        
-        function toggleSecurityPanel() {
-            const panel = document.getElementById('securityPanel');
-            if (panel.style.display === 'none') {
-                panel.style.display = 'block';
-                updateSecurityPanel();
-            } else {
-                panel.style.display = 'none';
-            }
-        }
-        
-        function updateSecurityPanel() {
-            if (!window.db.isAdmin) return;
-            
-            // Calcular estadísticas de seguridad
-            cleanupExpiredBlocks();
-            
-            const blockedIPs = Object.keys(window.securityLog.tempBlocks).length;
-            const failedAttempts = Object.values(window.securityLog.failedAttempts)
-                .reduce((sum, attempt) => sum + attempt.count, 0);
-            
-            // Calcular usuarios activos hoy
-            const todayStart = new Date().setHours(0, 0, 0, 0);
-            const activeUsers = new Set();
-            
-            Object.entries(window.securityLog.userActivity).forEach(([userKey, activity]) => {
-                const recentTransactions = activity.transactions.filter(t => 
-                    t.timestamp >= todayStart
-                );
-                if (recentTransactions.length > 0) {
-                    activeUsers.add(userKey);
-                }
-            });
-            
-            // Calcular actividad sospechosa
-            let suspiciousActivity = 0;
-            Object.entries(window.securityLog.failedAttempts).forEach(([ip, attempt]) => {
-                if (attempt.count >= 3) {
-                    suspiciousActivity++;
-                }
-            });
-            
-            // Actualizar estadísticas
-            document.getElementById('statBlocked').textContent = blockedIPs;
-            document.getElementById('statAttempts').textContent = failedAttempts;
-            document.getElementById('statActive').textContent = activeUsers.size;
-            document.getElementById('statSuspicious').textContent = suspiciousActivity;
-            
-            // Actualizar lista de IPs bloqueadas
-            updateBlockedIPsList();
-            
-            // Actualizar detalles de seguridad
-            updateSecurityDetails();
-        }
-        
-        function updateBlockedIPsList() {
-            const listEl = document.getElementById('blockedIPsList');
-            if (!listEl) return;
-            
-            const blockedEntries = Object.entries(window.securityLog.tempBlocks);
-            
-            if (blockedEntries.length === 0) {
-                listEl.innerHTML = `
-                    <div style="color: var(--text-secondary); text-align: center; padding: 20px;">
-                        No hay IPs bloqueadas
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '';
-            const now = Date.now();
-            
-            blockedEntries.forEach(([blockKey, expires]) => {
-                const ip = blockKey.replace('block-', '');
-                const remaining = Math.ceil((expires - now) / 60000); // minutos
-                
-                html += `
-                    <div style="padding: 10px; border-bottom: 1px solid var(--glass-border);">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div style="color: white; font-weight: 600;">${ip}</div>
-                            <div style="color: var(--accent); font-size: 0.8rem;">
-                                ${remaining > 0 ? `${remaining} min restantes` : 'Expirado'}
-                            </div>
-                        </div>
-                        <div style="color: var(--text-secondary); font-size: 0.7rem; margin-top: 5px;">
-                            Bloqueado por múltiples intentos fallidos
-                        </div>
-                    </div>
-                `;
-            });
-            
-            listEl.innerHTML = html;
-        }
-        
-        function clearAllBlocks() {
-            if (!confirm("¿Desbloquear todas las IPs bloqueadas?")) return;
-            
-            window.securityLog.tempBlocks = {};
-            window.securityLog.save();
-            
-            updateSecurityPanel();
-            showNotification("Todas las IPs han sido desbloqueadas", "success");
-        }
-        
-        function exportSecurityLog() {
-            const logData = {
-                fecha: new Date().toISOString(),
-                bloqueados: window.securityLog.tempBlocks,
-                intentosFallidos: window.securityLog.failedAttempts,
-                actividadUsuarios: window.securityLog.userActivity,
-                transacciones: window.securityLog.transactionLog.slice(-100)
-            };
-            
-            const blob = new Blob([JSON.stringify(logData, null, 2)], { type: 'application/json' });
-            const link = document.createElement('a');
-            
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute('download', `security_log_${Date.now()}.json`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             
-            showNotification("Logs de seguridad exportados", "success");
+            showNotification("Datos exportados a CSV", "success");
         }
         
-        function toggleSecurityDetails() {
-            const detailsEl = document.getElementById('securityDetails');
-            if (detailsEl.style.display === 'none') {
-                detailsEl.style.display = 'block';
-                updateSecurityDetails();
-            } else {
-                detailsEl.style.display = 'none';
-            }
-        }
-        
-        function updateSecurityDetails() {
-            const detailsEl = document.getElementById('securityStatsDetails');
-            if (!detailsEl) return;
+        function save() {
+            // Guardar en localStorage
+            localStorage.setItem('sb_dinamicas_premium_db', JSON.stringify(window.db));
             
-            // Calcular estadísticas detalladas
-            const ahora = Date.now();
-            const ultimas24h = ahora - (24 * 60 * 60 * 1000);
-            const ultimaHora = ahora - (60 * 60 * 1000);
-            
-            let transacciones24h = 0;
-            let transacciones1h = 0;
-            let numerosVendidos24h = 0;
-            
-            Object.values(window.securityLog.userActivity).forEach(activity => {
-                activity.transactions.forEach(trans => {
-                    if (trans.timestamp >= ultimas24h) {
-                        transacciones24h++;
-                        numerosVendidos24h += trans.numbersCount;
-                        
-                        if (trans.timestamp >= ultimaHora) {
-                            transacciones1h++;
-                        }
-                    }
+            // Guardar en Firebase si está disponible
+            if (window.saveToFirestore && window.db.isAdmin && isFirebaseReady) {
+                window.saveToFirestore().catch(err => {
+                    console.error("Error guardando en Firebase:", err);
                 });
-            });
+            }
             
-            let intentosFallidos24h = 0;
-            Object.values(window.securityLog.failedAttempts).forEach(attempt => {
-                if (attempt.lastAttempt >= ultimas24h) {
-                    intentosFallidos24h += attempt.count;
-                }
-            });
-            
-            const html = `
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                    <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px;">
-                        <div style="color: var(--text-secondary); font-size: 0.7rem;">Transacciones (24h)</div>
-                        <div style="color: white; font-size: 1.2rem; font-weight: 800;">${transacciones24h}</div>
-                    </div>
-                    
-                    <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px;">
-                        <div style="color: var(--text-secondary); font-size: 0.7rem;">Transacciones (1h)</div>
-                        <div style="color: white; font-size: 1.2rem; font-weight: 800;">${transacciones1h}</div>
-                    </div>
-                    
-                    <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px;">
-                        <div style="color: var(--text-secondary); font-size: 0.7rem;">Números vendidos (24h)</div>
-                        <div style="color: white; font-size: 1.2rem; font-weight: 800;">${numerosVendidos24h}</div>
-                    </div>
-                    
-                    <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px;">
-                        <div style="color: var(--text-secondary); font-size: 0.7rem;">Intentos fallidos (24h)</div>
-                        <div style="color: white; font-size: 1.2rem; font-weight: 800;">${intentosFallidos24h}</div>
-                    </div>
-                </div>
-                
-                <div style="margin-top: 15px;">
-                    <div style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 8px;">
-                        <i class="fas fa-info-circle"></i> Resumen de seguridad:
-                    </div>
-                    <div style="color: var(--text-secondary); font-size: 0.75rem; line-height: 1.4;">
-                        • Sistema activo y monitoreando en tiempo real<br>
-                        • ${transacciones24h} transacciones en las últimas 24 horas<br>
-                        • ${Object.keys(window.securityLog.userActivity).length} usuarios únicos registrados<br>
-                        • ${Object.keys(window.securityLog.tempBlocks).length} IPs actualmente bloqueadas
-                    </div>
-                </div>
+            updateUI();
+        }
+        
+        function showInstructions() {
+            const instructions = `
+                🎯 INSTRUCCIONES SB DINÁMICAS 🎯
+
+                1. SELECCIONA TUS NÚMEROS
+                   - Haz clic en los números disponibles
+                   - Usa "Selección rápida" para números al azar
+                   - Máximo 20 números por reserva
+
+                2. COMPLETA TUS DATOS
+                   - Nombre completo
+                   - Ciudad
+                   - Celular (10 dígitos, comienza con 3)
+
+                3. APARTA POR WHATSAPP
+                   - Se abrirá WhatsApp con tu reserva
+                   - Tienes 24 horas para pagar
+
+                4. ESTADOS DE LOS NÚMEROS:
+                   - 🔵 Disponible: Puedes seleccionarlo
+                   - 🟡 Apartado: Reservado, pendiente pago
+                   - 🟢 Pagado: Confirmado, no disponible
+                   - 🔴 Seleccionado: Tus números elegidos
+
+                📞 Soporte: Contacta al organizador
             `;
             
-            detailsEl.innerHTML = html;
+            alert(instructions);
         }
         
-        function refreshSecurityPanel() {
-            updateSecurityPanel();
-            showNotification("Panel de seguridad actualizado", "success");
-        }
-
         // =============================================
-        // INICIALIZACIÓN DE LA APLICACIÓN
+        // INICIALIZACIÓN DE LA APLICACIÓN - CORREGIDA
         // =============================================
         
-        document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar Firebase
-            initFirebase();
-            
+        function initApp() {
             // Inicializar WhatsApp
             initWhatsAppNumber();
             
-            // Inicializar UI
+            // Actualizar UI
             updateUI();
             
-            // Configurar limpieza automática cada 5 minutos
-            setInterval(() => {
-                cleanupExpiredBlocks();
-            }, 5 * 60 * 1000);
+            // ✅ CORRECCIÓN CRÍTICA: SIEMPRE empezar en vista usuario
+            // Esto evita que cualquiera vea el panel admin al recargar
+            showTab('user');
             
-            // Actualizar contador cada minuto
-            setInterval(() => {
-                actualizarContadorSorteo();
-            }, 60 * 1000);
-            
-            console.log("✅ SB DINÁMICAS Premium inicializado");
-            console.log("✅ Firebase:", isFirebaseReady ? "Conectado" : "Modo offline");
-            console.log("✅ WhatsApp:", WHATSAPP_NUMBER ? "Configurado" : "No configurado");
-            console.log("✅ Seguridad: Sistema activo");
-            
-            // Mostrar notificación de bienvenida
+            // Mostrar bienvenida
             setTimeout(() => {
-                showNotification("Bienvenido a SB DINÁMICAS Premium", "success", 3000);
+                showNotification("Bienvenido a SB Dinámicas Premium 🎉", "success", 3000);
             }, 1000);
-        });
+            
+            console.log("✅ App SB Dinámicas Premium inicializada");
+            console.log("Modo seguro activado: siempre empieza en vista usuario");
+        }
+        
+        // Inicializar cuando el DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+        
+        // Exponer funciones globalmente para Firebase
+        window.hideWhatsAppAlert = hideWhatsAppAlert;
+        window.showWhatsAppAlert = showWhatsAppAlert;
+        window.updateUI = updateUI;
     </script>
+    
+    <!-- FIREBASE CON SEGURIDAD CORREGIDA -->
+    <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyC8j6OmhdGkyF_Jw0Fz88BG0fWuixnY-EY",
+        authDomain: "sbdinamicas-2025.firebaseapp.com",
+        projectId: "sbdinamicas-2025",
+        storageBucket: "sbdinamicas-2025.firebasestorage.app",
+        messagingSenderId: "465275725018",
+        appId: "1:465275725018:web:9f58c09a23a74a419171e3"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+    const auth = getAuth(app);
+    const docRef = doc(firestore, "sorteos", "premium_v2");
+
+    // --- FUNCIÓN PARA GUARDAR DATOS (SÓLO SI ES ADMIN) ---
+    window.saveToFirestore = async () => {
+        if (!auth.currentUser) return;
+        try {
+            await setDoc(docRef, {
+                prize: window.db.prize,
+                desc: window.db.desc,
+                price: window.db.price,
+                img: window.db.img || "",
+                soldNumbers: window.db.soldNumbers,
+                whatsappNumber: window.db.whatsappNumber,
+                configCompleta: window.db.configCompleta || {}
+            });
+            console.log("🔥 Sincronizado en la nube");
+        } catch (e) {
+            console.error("Error guardando:", e);
+        }
+    };
+
+    // --- MANEJO DE LOGIN ---
+    document.getElementById('btnLoginFirebase').onclick = async () => {
+        const email = document.getElementById('adminEmail').value;
+        const password = document.getElementById('adminPass').value;
+        
+        const btn = document.getElementById('btnLoginFirebase');
+        btn.disabled = true;
+
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            window.db.isAdmin = true;
+            showNotification("✅ Acceso concedido", "success");
+            showTab('admin-panel');
+        } catch (err) {
+            showNotification("❌ Error: " + err.code, "error");
+        } finally {
+            btn.disabled = false;
+        }
+    };
+
+    // --- MANEJO DE LOGOUT ---
+    document.getElementById('btnLogout').onclick = async () => {
+        await signOut(auth);
+        window.db.isAdmin = false;
+        showTab('user');
+        location.reload(); // Recargar para limpiar estado
+    };
+
+    // --- ESCUCHADOR DE ESTADO ---
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            console.log("Admin detectado:", user.email);
+            window.db.isAdmin = true;
+            
+            // Escuchar cambios en tiempo real
+            onSnapshot(docRef, (snap) => {
+                if (snap.exists()) {
+                    const data = snap.data();
+                    window.db.soldNumbers = data.soldNumbers || {};
+                    window.db.prize = data.prize;
+                    window.db.price = data.price;
+                    window.db.whatsappNumber = data.whatsappNumber;
+                    window.db.configCompleta = data.configCompleta;
+                    window.updateUI();
+                }
+            });
+        } else {
+            window.db.isAdmin = false;
+            // Si no hay admin, solo leemos los datos una vez para el usuario
+            getDoc(docRef).then(snap => {
+                if(snap.exists()){
+                    window.db.soldNumbers = snap.data().soldNumbers || {};
+                    window.updateUI();
+                }
+            });
+        }
+    });
+</script>
+<a id="waSender"
+   href="#"
+   target="_blank"
+   rel="noopener"
+   style="display:none;"></a>
 </body>
 </html>
