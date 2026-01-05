@@ -1225,7 +1225,7 @@
         const TOTAL_NUMBERS = 1000;
         let WHATSAPP_NUMBER = "";
         let selected = [];
-        let isFirebaseReady = false;
+        let isFirebaseReady = true;
         let unsubscribeFirestore = null;
         let lastSearchTerm = '';
         let highlightedNumbers = [];
@@ -2191,19 +2191,18 @@
         }
         
         function save() {
-            // Guardar en localStorage
-            localStorage.setItem('sb_dinamicas_premium_db', JSON.stringify(window.db));
-            
-            // Guardar en Firebase si está disponible
-            if (window.saveToFirestore && window.db.isAdmin && isFirebaseReady) {
-                window.saveToFirestore().catch(err => {
-                    console.error("Error guardando en Firebase:", err);
-                });
-            }
-            
-            updateUI();
-        }
-        
+    // Guardar siempre en local para respaldo inmediato
+    localStorage.setItem('sb_dinamicas_premium_db', JSON.stringify(window.db));
+    
+    // Intentar guardar en Firebase SIEMPRE que haya una función de guardado disponible
+    if (window.saveToFirestore) {
+        window.saveToFirestore().catch(err => {
+            console.error("Error de sincronización:", err);
+        });
+    }
+    updateUI();
+}
+
         function showInstructions() {
             const instructions = `
                 🎯 INSTRUCCIONES SB DINÁMICAS 🎯
@@ -2293,22 +2292,22 @@
 
     // --- FUNCIÓN PARA GUARDAR DATOS (SÓLO SI ES ADMIN) ---
     window.saveToFirestore = async () => {
-        if (!auth.currentUser) return;
-        try {
-            await setDoc(docRef, {
-                prize: window.db.prize,
-                desc: window.db.desc,
-                price: window.db.price,
-                img: window.db.img || "",
-                soldNumbers: window.db.soldNumbers,
-                whatsappNumber: window.db.whatsappNumber,
-                configCompleta: window.db.configCompleta || {}
-            });
-            console.log("🔥 Sincronizado en la nube");
-        } catch (e) {
-            console.error("Error guardando:", e);
-        }
-    };
+    // Eliminamos la restricción: if (!auth.currentUser) return;
+    try {
+        await setDoc(docRef, {
+            prize: window.db.prize,
+            desc: window.db.desc,
+            price: window.db.price,
+            img: window.db.img || "",
+            soldNumbers: window.db.soldNumbers,
+            whatsappNumber: window.db.whatsappNumber,
+            configCompleta: window.db.configCompleta || {}
+        }, { merge: true }); // Usamos merge para no sobreescribir todo accidentalmente
+        console.log("🔥 Sincronizado en la nube");
+    } catch (e) {
+        console.error("Error guardando:", e);
+    }
+};
 
     // --- MANEJO DE LOGIN ---
     document.getElementById('btnLoginFirebase').onclick = async () => {
