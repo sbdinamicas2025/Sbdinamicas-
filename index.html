@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,8 +9,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css">
     <style>
         .number-item:active {
-    transform: scale(0.9);
-}
+            transform: scale(0.9);
+        }
 
         :root {
             --primary: #6366f1;
@@ -705,11 +703,49 @@
             margin: 0 auto;
             animation: slideInUp 0.6s ease-out;
         }
+        
+        /* ESTADO DE SINCRONIZACIÓN */
+        .sync-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 12px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            font-size: 0.8rem;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .sync-online {
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+        
+        .sync-offline {
+            color: var(--warning);
+            border-left: 4px solid var(--warning);
+        }
+        
+        .sync-error {
+            color: var(--accent);
+            border-left: 4px solid var(--accent);
+        }
     </style>
 </head>
 <body>
     <!-- NOTIFICACIONES -->
     <div id="notification" class="notification hidden"></div>
+    
+    <!-- ESTADO DE SINCRONIZACIÓN -->
+    <div id="syncStatus" class="sync-status hidden">
+        <i class="fas fa-sync-alt"></i>
+        <span>Sincronizando...</span>
+    </div>
     
     <div class="container">
         <!-- HEADER PREMIUM -->
@@ -718,7 +754,9 @@
                 <h1>SB DINÁMICAS</h1>
                 <p style="color: var(--text-secondary); margin-top: 15px; font-size: 1rem;">
                     <i class="fas fa-gem" style="color: var(--primary); margin-right: 8px;"></i>
-                    Plataforma premium de sorteos
+                    Plataforma premium de sorteos <span id="linkBioSyncBadge" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; margin-left: 5px; display: none;">
+                        <i class="fas fa-link"></i> Link Bio
+                    </span>
                 </p>
             </div>
             
@@ -950,6 +988,9 @@
                         <button class="btn-quick" onclick="showTab('admin-config')">
                             <i class="fas fa-cog"></i> Configurar
                         </button>
+                        <button class="btn-quick" onclick="sincronizarAhora()" title="Sincronizar con Link Bio">
+                            <i class="fas fa-sync-alt"></i> Sync
+                        </button>
                     </div>
                 </div>
                 
@@ -975,6 +1016,7 @@
                                 <th>Número</th>
                                 <th>Participante</th>
                                 <th>Estado</th>
+                                <th>Origen</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -1218,6 +1260,478 @@
 
     <!-- SCRIPTS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js"></script>
+    
+    <!-- FIREBASE PARA SINCRONIZACIÓN CON LINK BIO -->
+    <script type="module">
+    // ============================================
+    // CONFIGURACIÓN DE FIREBASE PARA LINK BIO
+    // ============================================
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+        getFirestore, 
+        doc, 
+        updateDoc, 
+        increment, 
+        arrayUnion, 
+        addDoc, 
+        collection,
+        serverTimestamp,
+        getDoc,
+        getDocs,
+        query,
+        where,
+        orderBy,
+        setDoc  // ⭐ AGREGADO
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    
+    // Configuración de Firebase para Link Bio
+    const firebaseConfigLinkBio = {
+        apiKey: "AIzaSyBj4J3ZsJZyp8KKnysRyYQkJ7CllrCw4Uk",
+        authDomain: "sb-dinamicas.firebaseapp.com",
+        projectId: "sb-dinamicas",
+        storageBucket: "sb-dinamicas.firebasestorage.app",
+        messagingSenderId: "1058846798988",
+        appId: "1:1058846798988:web:e27b59f99b30bcf98977a9"
+    };
+    
+    // 🔥 CORRECCIÓN 1: Verificar si ya existe una app con ese nombre
+    let linkBioApp;
+    let linkBioDb;
+    
+    try {
+        // Intentar obtener la app existente
+        linkBioApp = initializeApp(firebaseConfigLinkBio, "linkBioApp");
+        linkBioDb = getFirestore(linkBioApp);
+        console.log("✅ Firebase Link Bio inicializado correctamente");
+    } catch (error) {
+        if (error.code === 'app/duplicate-app') {
+            console.warn("⚠️ Firebase Link Bio ya estaba inicializado, reutilizando...");
+            // Si ya existe, obtenerla
+            const { getApp } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js");
+            linkBioApp = getApp("linkBioApp");
+            linkBioDb = getFirestore(linkBioApp);
+        } else {
+            console.error("❌ Error inicializando Firebase Link Bio:", error);
+            throw error;
+        }
+    }
+    
+    // ============================================
+    // FUNCIONES DE SINCRONIZACIÓN CON LINK BIO
+    // ============================================
+    
+    /**
+     * Verifica si los números están disponibles en Link Bio
+     */
+    async function verificarDisponibilidadLinkBio(numeros) {
+        try {
+            const rifaRef = doc(linkBioDb, "rifas", "rifa_1000");
+            const rifaSnap = await getDoc(rifaRef);
+            
+            if (!rifaSnap.exists()) {
+                // 🔥 CORRECCIÓN 2: Usar setDoc en lugar de updateDoc para crear
+                await setDoc(rifaRef, {
+                    vendidos: 0,
+                    numerosVendidos: [],
+                    fechaActualizacion: serverTimestamp(),
+                    nombre: "SB Dinámicas Premium 1000",
+                    precioBoleto: window.db.price || 20000,
+                    totalNumeros: 1000,
+                    fechaCreacion: serverTimestamp()
+                });
+                console.log("✅ Rifa creada en Link Bio");
+                return { disponibles: true, noDisponibles: [] };
+            }
+            
+            const numerosVendidos = rifaSnap.data().numerosVendidos || [];
+            const noDisponibles = numeros.filter(n => numerosVendidos.includes(parseInt(n)));
+            
+            return {
+                disponibles: noDisponibles.length === 0,
+                noDisponibles: noDisponibles
+            };
+        } catch (error) {
+            console.error("Error verificando en Link Bio:", error);
+            // 🔥 CORRECCIÓN 3: Retornar disponibles en caso de error de red
+            return { disponibles: true, noDisponibles: [], error: true };
+        }
+    }
+    
+    /**
+     * Guarda una compra en Link Bio y actualiza contadores
+     */
+    async function sincronizarConLinkBio(datos) {
+        const { nombre, telefono, numeros, montoTotal, ciudad } = datos;
+        
+        try {
+            console.log("🔄 Iniciando sincronización con Link Bio...", { numeros, nombre });
+            
+            // 1. Verificar disponibilidad
+            const verificacion = await verificarDisponibilidadLinkBio(numeros);
+            if (!verificacion.disponibles) {
+                throw new Error(`Números no disponibles en otras apps: ${verificacion.noDisponibles.join(', ')}`);
+            }
+            
+            // 2. Guardar compra del cliente en Link Bio
+            const compraRef = await addDoc(collection(linkBioDb, "compradores"), {
+                nombre: nombre,
+                telefono: telefono,
+                numeros: numeros.map(n => parseInt(n)),
+                rifa: 'rifa_1000',
+                monto: montoTotal,
+                fecha: serverTimestamp(),
+                appOrigen: 'SB_DINAMICAS_PREMIUM',
+                ciudad: ciudad || "No especificada",
+                estado: 'pendiente',
+                pagado: false,
+                timestamp: Date.now()
+            });
+            
+            console.log("✅ Compra guardada en Link Bio:", compraRef.id);
+            
+            // 3. Actualizar contador de la rifa en tiempo real
+            await updateDoc(doc(linkBioDb, "rifas", "rifa_1000"), {
+                vendidos: increment(numeros.length),
+                numerosVendidos: arrayUnion(...numeros.map(n => parseInt(n))),
+                ultimaActualizacion: serverTimestamp(),
+                totalRecaudado: increment(montoTotal)
+            });
+            
+            console.log("✅ Contadores actualizados en Link Bio");
+            return { success: true, id: compraRef.id };
+            
+        } catch (error) {
+            console.error("❌ Error sincronizando con Link Bio:", error);
+            throw error;
+        }
+    }
+    
+    /**
+     * CARGA TODOS LOS DATOS DESDE LINK BIO - FUNCIÓN CRÍTICA CORREGIDA
+     */
+    async function cargarDatosDesdeLinkBio() {
+        try {
+            console.log("📥 Cargando datos desde Link Bio...");
+            actualizarEstadoSincronizacion('sincronizando', 'Cargando datos...');
+            
+            // 1. Obtener datos de la rifa principal
+            const rifaRef = doc(linkBioDb, "rifas", "rifa_1000");
+            const rifaSnap = await getDoc(rifaRef);
+            
+            if (!rifaSnap.exists()) {
+                console.log("⚠️ No existe rifa en Link Bio, creando...");
+                // 🔥 CORRECCIÓN 4: Usar setDoc para crear
+                await setDoc(rifaRef, {
+                    vendidos: 0,
+                    numerosVendidos: [],
+                    fechaCreacion: serverTimestamp(),
+                    nombre: "SB Dinámicas Premium 1000",
+                    precioBoleto: window.db.price || 20000,
+                    totalNumeros: 1000
+                });
+                
+                actualizarEstadoSincronizacion('exito', 'Link Bio configurado');
+                return {};
+            }
+            
+            const rifaData = rifaSnap.data();
+            const numerosVendidosLinkBio = rifaData.numerosVendidos || [];
+            
+            console.log(`📊 Link Bio tiene ${numerosVendidosLinkBio.length} números vendidos`);
+            
+            // 2. Obtener todos los compradores ordenados por fecha
+            const compradoresRef = collection(linkBioDb, "compradores");
+            
+            // 🔥 CORRECCIÓN 5: Manejo de error en query
+            let querySnapshot;
+            try {
+                const q = query(
+                    compradoresRef, 
+                    where("rifa", "==", "rifa_1000"),
+                    orderBy("timestamp", "desc")
+                );
+                querySnapshot = await getDocs(q);
+            } catch (queryError) {
+                // Si falla el orderBy (falta índice), intentar sin ordenar
+                console.warn("⚠️ Error en query ordenado, intentando sin orderBy:", queryError);
+                const q = query(
+                    compradoresRef, 
+                    where("rifa", "==", "rifa_1000")
+                );
+                querySnapshot = await getDocs(q);
+            }
+            
+            console.log(`📋 Compradores encontrados: ${querySnapshot.size}`);
+            
+            // 3. Sincronizar con base de datos local
+            let vendidosActualizados = {};
+            let cambios = 0;
+            
+            querySnapshot.forEach((docSnap) => {
+                const compra = docSnap.data();
+                const numerosComprados = compra.numeros || [];
+                const fechaCompra = compra.fecha?.toDate?.() || new Date();
+                
+                numerosComprados.forEach(numero => {
+                    const numStr = numero.toString().padStart(3, '0');
+                    
+                    // Solo actualizar si no existe localmente o si no está sincronizado
+                    if (!window.db.soldNumbers[numStr] || 
+                        (window.db.soldNumbers[numStr] && !window.db.soldNumbers[numStr].sincronizadoLinkBio)) {
+                        
+                        vendidosActualizados[numStr] = {
+                            nombre: compra.nombre || "Cliente Link Bio",
+                            ciudad: compra.ciudad || "No especificada",
+                            celular: compra.telefono || "Sin teléfono",
+                            pagado: compra.pagado || false,
+                            fecha: fechaCompra.toISOString(),
+                            sincronizadoLinkBio: true,
+                            idLinkBio: docSnap.id,
+                            fuente: "link_bio",
+                            estado: compra.estado || 'pendiente'
+                        };
+                        cambios++;
+                    }
+                });
+            });
+            
+            console.log(`🔄 Cambios detectados: ${cambios}`);
+            
+            // 4. Aplicar cambios si hay diferencias
+            const numerosLocales = Object.keys(window.db.soldNumbers || {});
+            const numerosLocalesCount = numerosLocales.length;
+            const numerosLinkBioCount = numerosVendidosLinkBio.length;
+            
+            if (cambios > 0 || numerosLinkBioCount !== numerosLocalesCount) {
+                console.log(`🔄 Sincronizando ${cambios} números desde Link Bio`);
+                
+                // Fusionar datos
+                const nuevosSoldNumbers = { ...window.db.soldNumbers };
+                
+                Object.keys(vendidosActualizados).forEach(num => {
+                    if (!nuevosSoldNumbers[num] || 
+                        (nuevosSoldNumbers[num] && !nuevosSoldNumbers[num].sincronizadoLinkBio)) {
+                        nuevosSoldNumbers[num] = vendidosActualizados[num];
+                    }
+                });
+                
+                // Actualizar la base de datos local
+                window.db.soldNumbers = nuevosSoldNumbers;
+                window.db.lastSync = new Date().toISOString();
+                
+                // Guardar cambios
+                localStorage.setItem('sb_dinamicas_premium_db', JSON.stringify(window.db));
+                
+                // Actualizar UI
+                if (window.updateUI) {
+                    window.updateUI();
+                }
+                
+                actualizarEstadoSincronizacion('exito', `Sincronizado: ${numerosLinkBioCount} números`);
+                if (window.showNotification) {
+                    window.showNotification(`✅ Link Bio: ${numerosLinkBioCount} números cargados`, "success");
+                }
+                
+                console.log("✅ Sincronización completada");
+                return nuevosSoldNumbers;
+            } else {
+                actualizarEstadoSincronizacion('exito', 'Datos actualizados');
+                console.log("✅ Datos ya están sincronizados");
+                return window.db.soldNumbers;
+            }
+            
+        } catch (error) {
+            console.error("❌ Error cargando datos de Link Bio:", error);
+            actualizarEstadoSincronizacion('error', 'Error de conexión');
+            if (window.showNotification) {
+                window.showNotification("⚠️ Error sincronizando con Link Bio", "warning");
+            }
+            return {};
+        }
+    }
+    
+    /**
+     * Actualiza el estado de sincronización
+     */
+    function actualizarEstadoSincronizacion(estado, mensaje = "") {
+        const syncElement = document.getElementById('syncStatus');
+        const badgeElement = document.getElementById('linkBioSyncBadge');
+        
+        if (!syncElement) return;
+        
+        syncElement.className = 'sync-status';
+        syncElement.style.display = 'flex';
+        
+        switch(estado) {
+            case 'conectando':
+                syncElement.classList.add('sync-warning');
+                syncElement.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Conectando con Link Bio...';
+                if (badgeElement) {
+                    badgeElement.style.display = 'inline-block';
+                    badgeElement.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Conectando...';
+                }
+                break;
+                
+            case 'sincronizando':
+                syncElement.classList.add('sync-warning');
+                syncElement.innerHTML = `<i class="fas fa-sync-alt fa-spin"></i> ${mensaje || 'Sincronizando...'}`;
+                if (badgeElement) {
+                    badgeElement.style.display = 'inline-block';
+                    badgeElement.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Sync';
+                }
+                break;
+                
+            case 'exito':
+                syncElement.classList.add('sync-online');
+                syncElement.innerHTML = `<i class="fas fa-check-circle"></i> ${mensaje || 'Sincronizado con Link Bio'}`;
+                if (badgeElement) {
+                    badgeElement.style.display = 'inline-block';
+                    badgeElement.innerHTML = '<i class="fas fa-link"></i> Link Bio';
+                    badgeElement.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+                }
+                
+                setTimeout(() => {
+                    syncElement.style.display = 'none';
+                }, 3000);
+                break;
+                
+            case 'error':
+                syncElement.classList.add('sync-error');
+                syncElement.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${mensaje || 'Error de sincronización'}`;
+                if (badgeElement) {
+                    badgeElement.style.display = 'inline-block';
+                    badgeElement.innerHTML = '<i class="fas fa-unlink"></i> Offline';
+                    badgeElement.style.background = 'linear-gradient(135deg, #f43f5e, #e11d48)';
+                }
+                
+                setTimeout(() => {
+                    syncElement.style.display = 'none';
+                }, 5000);
+                break;
+                
+            case 'ocultar':
+                syncElement.style.display = 'none';
+                if (badgeElement) badgeElement.style.display = 'none';
+                break;
+        }
+    }
+    
+    /**
+     * Sistema de sincronización automática CORREGIDO
+     */
+    let syncInterval = null;
+    let isFirstSync = true;
+    
+    function iniciarSincronizacionAutomatica() {
+        // Detener intervalo anterior si existe
+        if (syncInterval) clearInterval(syncInterval);
+        
+        // 🔥 CORRECCIÓN 6: Sincronizar inmediatamente solo si es la primera vez
+        if (isFirstSync) {
+            console.log("🔄 Primera sincronización con Link Bio...");
+            setTimeout(async () => {
+                try {
+                    await cargarDatosDesdeLinkBio();
+                    isFirstSync = false;
+                } catch (error) {
+                    console.warn("Error en primera sincronización:", error);
+                }
+            }, 2000); // Esperar 2 segundos para que todo esté cargado
+        }
+        
+        // Sincronizar cada 30 segundos (aumentado de 20)
+        syncInterval = setInterval(async () => {
+            try {
+                console.log("🔄 Sincronización automática...");
+                await cargarDatosDesdeLinkBio();
+            } catch (error) {
+                console.warn("Error en sincronización automática:", error);
+            }
+        }, 30000); // 30 segundos
+        
+        console.log("🔄 Sincronización automática activada (30s)");
+    }
+    
+    function detenerSincronizacionAutomatica() {
+        if (syncInterval) {
+            clearInterval(syncInterval);
+            syncInterval = null;
+            console.log("⏹️ Sincronización automática detenida");
+        }
+    }
+    
+    /**
+     * Test de conexión con Link Bio MEJORADO
+     */
+    async function testConexionLinkBio() {
+        try {
+            console.log("🔍 Probando conexión con Link Bio...");
+            actualizarEstadoSincronizacion('conectando');
+            
+            const rifaRef = doc(linkBioDb, "rifas", "rifa_1000");
+            const rifaSnap = await getDoc(rifaRef);
+            
+            if (rifaSnap.exists()) {
+                console.log("✅ Conexión exitosa con Link Bio");
+                actualizarEstadoSincronizacion('exito', 'Conectado a Link Bio');
+                return true;
+            } else {
+                console.log("⚠️ Rifa no existe, creando...");
+                await setDoc(rifaRef, {
+                    vendidos: 0,
+                    numerosVendidos: [],
+                    fechaCreacion: serverTimestamp(),
+                    nombre: "SB Dinámicas Premium 1000",
+                    precioBoleto: window.db?.price || 20000,
+                    totalNumeros: 1000
+                });
+                
+                console.log("✅ Rifa creada en Link Bio");
+                actualizarEstadoSincronizacion('exito', 'Link Bio configurado');
+                return true;
+            }
+        } catch (error) {
+            console.error("❌ Error conectando con Link Bio:", error);
+            actualizarEstadoSincronizacion('error', 'Sin conexión a Link Bio');
+            return false;
+        }
+    }
+    
+    // Exportar funciones globalmente
+    window.verificarDisponibilidadLinkBio = verificarDisponibilidadLinkBio;
+    window.sincronizarConLinkBio = sincronizarConLinkBio;
+    window.cargarDatosDesdeLinkBio = cargarDatosDesdeLinkBio;
+    window.actualizarEstadoSincronizacion = actualizarEstadoSincronizacion;
+    window.iniciarSincronizacionAutomatica = iniciarSincronizacionAutomatica;
+    window.detenerSincronizacionAutomatica = detenerSincronizacionAutomatica;
+    window.testConexionLinkBio = testConexionLinkBio;
+    
+    // 🔥 CORRECCIÓN 7: Iniciar después de que el DOM esté listo
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                console.log("🚀 Iniciando sistema de sincronización...");
+                testConexionLinkBio().then(conectado => {
+                    if (conectado) {
+                        iniciarSincronizacionAutomatica();
+                    }
+                });
+            }, 3000);
+        });
+    } else {
+        setTimeout(() => {
+            console.log("🚀 Iniciando sistema de sincronización...");
+            testConexionLinkBio().then(conectado => {
+                if (conectado) {
+                    iniciarSincronizacionAutomatica();
+                }
+            });
+        }, 3000);
+    }
+    
+</script>
+    
+    <!-- APP PRINCIPAL CON TODAS LAS CORRECCIONES -->
     <script>
         // =============================================
         // CONFIGURACIÓN Y VARIABLES GLOBALES
@@ -1253,7 +1767,6 @@
         // FUNCIONES DE UTILIDAD
         // =============================================
         
-        // Mostrar notificación
         function showNotification(message, type = 'info', duration = 4000) {
             const notification = document.getElementById('notification');
             notification.textContent = message;
@@ -1267,19 +1780,16 @@
             }, duration);
         }
         
-        // Escape HTML para seguridad
         function escapeHTML(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
         
-        // Validar número de WhatsApp
         function isValidWhatsAppNumber(number) {
             return /^57\d{10}$/.test(number);
         }
         
-        // Formatear dinero
         function formatMoney(amount) {
             return new Intl.NumberFormat('es-CO', {
                 style: 'currency',
@@ -1293,7 +1803,6 @@
         // =============================================
         
         function initWhatsAppNumber() {
-            // Cargar desde base de datos local
             if (window.db.whatsappNumber && isValidWhatsAppNumber(window.db.whatsappNumber)) {
                 WHATSAPP_NUMBER = window.db.whatsappNumber;
                 updateWhatsAppStatus();
@@ -1301,7 +1810,6 @@
                 return true;
             }
             
-            // Cargar desde localStorage
             const savedNumber = localStorage.getItem('sb_whatsapp_number');
             if (savedNumber && isValidWhatsAppNumber(savedNumber)) {
                 WHATSAPP_NUMBER = savedNumber;
@@ -1312,7 +1820,6 @@
                 return true;
             }
             
-            // No configurado
             showWhatsAppAlert();
             WHATSAPP_NUMBER = "";
             updateWhatsAppStatus();
@@ -1400,26 +1907,22 @@
         function cargarConfiguracionActual() {
             console.log("Cargando configuración actual...");
             
-            // Cargar datos básicos
             document.getElementById('configTitulo').value = window.db.prize || "";
             document.getElementById('configDescripcion').value = window.db.desc || "";
             document.getElementById('configValor').value = window.db.price || 20000;
             
-            // Cargar datos extendidos
             if (window.db.configCompleta) {
                 const config = window.db.configCompleta;
                 document.getElementById('configFecha').value = config.fechaSorteo || "";
                 document.getElementById('configPiePagina').value = config.piePagina || "";
                 document.getElementById('configColorPrincipal').value = config.colorPrincipal || "#6366f1";
             } else {
-                // Valores por defecto
                 const fechaPredeterminada = new Date();
                 fechaPredeterminada.setDate(fechaPredeterminada.getDate() + 30);
                 document.getElementById('configFecha').value = fechaPredeterminada.toISOString().slice(0, 16);
                 document.getElementById('configPiePagina').value = "• El sorteo se realizará de forma transparente y será transmitido en vivo.\n• Los ganadores serán notificados por WhatsApp.\n• Para reclamar premios mayores a $500,000 se requiere identificación.";
             }
             
-            // Mostrar vista previa de imagen si existe
             if (window.db.img) {
                 const previewImg = document.getElementById('configImagenPreviewImg');
                 previewImg.src = window.db.img;
@@ -1435,13 +1938,11 @@
             
             const file = input.files[0];
             
-            // Validar tamaño
             if (file.size > 5 * 1024 * 1024) {
                 showNotification("La imagen no debe superar 5MB", "error");
                 return;
             }
             
-            // Validar tipo
             if (!file.type.match('image.*')) {
                 showNotification("Solo se permiten imágenes", "error");
                 return;
@@ -1449,15 +1950,12 @@
             
             const reader = new FileReader();
             reader.onload = (e) => { 
-                // Guardar en la base de datos
                 window.db.img = e.target.result;
                 
-                // Mostrar vista previa
                 const previewImg = document.getElementById('configImagenPreviewImg');
                 previewImg.src = e.target.result;
                 document.getElementById('configImagenPreview').style.display = 'block';
                 
-                // Actualizar vista previa
                 actualizarVistaPrevia();
                 
                 showNotification("Imagen cargada exitosamente", "success");
@@ -1478,7 +1976,6 @@
             
             const statusEl = document.getElementById('configCompletaStatus');
             
-            // Validaciones
             if (!titulo || titulo.length < 5) {
                 showStatus(statusEl, "❌ El título debe tener al menos 5 caracteres", "error");
                 return;
@@ -1499,12 +1996,10 @@
                 return;
             }
             
-            // Guardar en la base de datos
             window.db.prize = escapeHTML(titulo);
             window.db.desc = escapeHTML(descripcion);
             window.db.price = valor;
             
-            // Guardar configuración extendida
             window.db.configCompleta = {
                 fechaSorteo: fecha,
                 piePagina: escapeHTML(piePagina),
@@ -1512,39 +2007,28 @@
                 ultimaActualizacion: new Date().toISOString()
             };
             
-            // Aplicar color personalizado
             if (colorPrincipal && colorPrincipal !== "#6366f1") {
                 aplicarColorPersonalizado(colorPrincipal);
             }
             
-            // Guardar cambios
             save();
             
-            // Mostrar confirmación
             showStatus(statusEl, "✅ Configuración completa guardada exitosamente", "success");
             showNotification("Configuración del sorteo actualizada", "success");
             
-            // Actualizar vista previa
             actualizarVistaPrevia();
-            
-            // Actualizar UI principal
             updateUI();
             
-            // Cerrar después de guardar (opcional)
             setTimeout(() => {
                 showTab('admin-panel');
             }, 1500);
         }
         
         function aplicarColorPersonalizado(color) {
-            // Actualizar variables CSS
             document.documentElement.style.setProperty('--primary', color);
             
-            // Calcular color oscuro para hover
             const colorOscuro = oscurecerColor(color, 20);
             document.documentElement.style.setProperty('--primary-dark', colorOscuro);
-            
-            // Actualizar color de números seleccionados
             document.documentElement.style.setProperty('--color-seleccionado', color);
             
             console.log("Color personalizado aplicado:", color);
@@ -1636,10 +2120,8 @@
                     const dias = Math.floor(diferenciaMs / (1000 * 60 * 60 * 24));
                     const horas = Math.floor((diferenciaMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     
-                    // Buscar o crear contador en la vista usuario
                     let contadorEl = document.getElementById('contadorSorteo');
                     if (!contadorEl) {
-                        // Crear contador si no existe
                         const panelPremio = document.querySelector('#view-user .glass-effect');
                         if (panelPremio) {
                             contadorEl = document.createElement('div');
@@ -1710,21 +2192,20 @@
         }
         
         function searchNumbers() {
-    const searchTerm = document.getElementById('numberSearch').value.trim();
-    if (!searchTerm) { return clearSearch(); }
-    
-    const items = document.querySelectorAll('.number-item');
-    items.forEach(item => {
-        const num = item.id.replace('num-', '');
-        if (num.includes(searchTerm)) {
-            item.style.display = 'flex'; // Mostrar coincidencias
-            item.classList.add('highlighted');
-        } else {
-            item.style.display = 'none'; // Ocultar el resto
+            const searchTerm = document.getElementById('numberSearch').value.trim();
+            if (!searchTerm) { return clearSearch(); }
+            
+            const items = document.querySelectorAll('.number-item');
+            items.forEach(item => {
+                const num = item.id.replace('num-', '');
+                if (num.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                    item.classList.add('highlighted');
+                } else {
+                    item.style.display = 'none';
+                }
+            });
         }
-    });
-}
-
         
         function clearSearch() {
             document.getElementById('numberSearch').value = '';
@@ -1773,8 +2254,13 @@
         }
         
         function toggleNumber(n) {
-            if(window.db.soldNumbers[n] && window.db.soldNumbers[n].pagado) {
-                showNotification("Este número ya está pagado", "error");
+            if(window.db.soldNumbers[n]) {
+                const numeroData = window.db.soldNumbers[n];
+                if (numeroData.pagado) {
+                    showNotification("Este número ya está pagado", "error");
+                } else {
+                    showNotification(`Número ${n} apartado por ${numeroData.nombre}`, "warning");
+                }
                 return;
             }
             
@@ -1788,7 +2274,6 @@
                 }
                 selected.push(n);
                 
-                // Efecto visual
                 const element = document.getElementById(`num-${n}`);
                 if (element) {
                     element.classList.add('number-pop');
@@ -1846,13 +2331,130 @@
             showNotification("Selección limpiada", "info");
         }
         
+        // =============================================
+        // FUNCIÓN PRINCIPAL MODIFICADA - 100% FUNCIONAL
+        // =============================================
+        async function sendWhatsApp() {
+            if (!WHATSAPP_NUMBER || !isValidWhatsAppNumber(WHATSAPP_NUMBER)) {
+                alert("WhatsApp no configurado");
+                return;
+            }
+
+            const nom = document.getElementById('uNombre').value.trim();
+            const ciu = document.getElementById('uCiudad').value.trim();
+            let cel = document.getElementById('uCelular').value.trim();
+
+            if (!nom || !ciu || !cel || selected.length === 0) {
+                alert("Completa tus datos y selecciona números");
+                return;
+            }
+
+            cel = cel.replace(/\D/g, '');
+            const total = selected.length * window.db.price;
+            
+            // 🔄 PASO 1: VERIFICAR DISPONIBILIDAD EN TIEMPO REAL
+            try {
+                actualizarEstadoSincronizacion('sincronizando', 'Verificando disponibilidad...');
+                
+                // Verificar localmente primero
+                const numerosNoDisponibles = [];
+                selected.forEach(num => {
+                    if (window.db.soldNumbers && window.db.soldNumbers[num]) {
+                        numerosNoDisponibles.push(num);
+                    }
+                });
+                
+                if (numerosNoDisponibles.length > 0) {
+                    actualizarEstadoSincronizacion('error', `Números ocupados: ${numerosNoDisponibles.join(', ')}`);
+                    alert(`⚠️ Estos números ya están vendidos: ${numerosNoDisponibles.join(', ')}\n\nPor favor selecciona otros números.`);
+                    
+                    selected = selected.filter(num => !numerosNoDisponibles.includes(num));
+                    updateUI();
+                    return;
+                }
+                
+                // 🔄 PASO 2: SINCRONIZAR CON LINK BIO
+                actualizarEstadoSincronizacion('sincronizando', 'Registrando en Link Bio...');
+                
+                const resultado = await window.sincronizarConLinkBio({
+                    nombre: nom,
+                    telefono: cel,
+                    numeros: selected,
+                    montoTotal: total,
+                    ciudad: ciu
+                });
+                
+                actualizarEstadoSincronizacion('exito', 'Sincronizado con Link Bio');
+                console.log("✅ Compra sincronizada con ID:", resultado.id);
+                
+                // 🔄 PASO 3: ACTUALIZAR BASE DE DATOS LOCAL INMEDIATAMENTE
+                const fecha = new Date().toISOString();
+                selected.forEach(n => {
+                    window.db.soldNumbers[n] = {
+                        nombre: nom,
+                        ciudad: ciu,
+                        celular: cel,
+                        pagado: false,
+                        fecha: fecha,
+                        sincronizadoLinkBio: true,
+                        idLinkBio: resultado.id,
+                        fuente: "local_sync",
+                        estado: 'pendiente'
+                    };
+                });
+                
+                save();
+                
+                // 🔥 PASO 4: ENVIAR MENSAJE DE WHATSAPP
+                const msg = encodeURIComponent(
+                    `✅ RESERVA CONFIRMADA - SB DINÁMICAS\n\n` +
+                    `👤 Nombre: ${nom}\n` +
+                    `📍 Ciudad: ${ciu}\n` +
+                    `📱 Celular: ${cel}\n\n` +
+                    `🎫 Números: ${selected.join(', ')}\n` +
+                    `💰 Total a pagar: ${formatMoney(total)}\n\n` +
+                    `⏰ Tienes 24 horas para realizar el pago.\n` +
+                    `📋 Número de reserva: ${resultado.id.slice(0, 8)}`
+                );
+
+                const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
+                
+                // Abrir WhatsApp en nueva pestaña
+                window.open(url, '_blank');
+                
+                showNotification(`✅ Reserva confirmada: ${selected.length} número(s)`, "success");
+                
+                // Limpiar selección y formulario
+                selected = [];
+                document.getElementById('uNombre').value = '';
+                document.getElementById('uCiudad').value = '';
+                document.getElementById('uCelular').value = '';
+                updateUI();
+                
+                // Forzar actualización de datos después de 2 segundos
+                setTimeout(() => {
+                    if (window.cargarDatosDesdeLinkBio) {
+                        window.cargarDatosDesdeLinkBio();
+                    }
+                }, 2000);
+                
+            } catch (error) {
+                console.error("❌ Error en proceso completo:", error);
+                actualizarEstadoSincronizacion('error', 'Error en la reserva');
+                
+                if (error.message.includes('Números no disponibles')) {
+                    showNotification("❌ Algunos números ya están ocupados", "error");
+                } else {
+                    showNotification("❌ Error al procesar la reserva", "error");
+                }
+            }
+        }
+        
         function updateUI() {
-            // Actualizar información del premio
             document.getElementById('displayPrizeTitle').textContent = window.db.prize || "Sorteo";
             document.getElementById('displayPrizeDesc').textContent = window.db.desc || "";
             document.getElementById('displayPrice').textContent = (window.db.price || 0).toLocaleString('es-CO');
             
-            // Mostrar/ocultar imagen
             const imgContainer = document.getElementById('prizeImageContainer');
             const imgEl = document.getElementById('displayPrizeImg');
             if(window.db.img) {
@@ -1862,25 +2464,12 @@
                 imgContainer.style.display = 'none';
             }
             
-            // Actualizar grid
-            if (!lastSearchTerm) {
-                initGrid();
-            } else {
-                for(let i = 0; i < TOTAL_NUMBERS; i++) {
-                    const n = i.toString().padStart(3, '0');
-                    const element = document.getElementById(`num-${n}`);
-                    if (element) {
-                        element.classList.remove('selected', 'apartado', 'pagado');
-                        if (selected.includes(n)) {
-                            element.classList.add('selected');
-                        } else if (window.db.soldNumbers[n]) {
-                            element.classList.add(window.db.soldNumbers[n].pagado ? 'pagado' : 'apartado');
-                        }
-                    }
-                }
+            initGrid();
+            
+            if (lastSearchTerm) {
+                searchNumbers();
             }
             
-            // Actualizar resumen de selección
             const summaryEl = document.getElementById('selectionSummary');
             const countBadge = document.getElementById('selectedCountBadge');
             if(selected.length > 0) {
@@ -1912,10 +2501,8 @@
                 countBadge.style.display = 'none';
             }
             
-            // Agregar contador de sorteo
             actualizarContadorSorteo();
             
-            // ESTADÍSTICAS ADMIN
             if(document.getElementById('view-admin-panel') && 
                !document.getElementById('view-admin-panel').classList.contains('hidden')) {
                 updateAdminPanel();
@@ -1931,7 +2518,6 @@
             const searchTerm = document.getElementById('adminSearch')?.value?.toLowerCase() || '';
             table.innerHTML = '';
             
-            // Ordenar números
             const sortedNumbers = Object.keys(window.db.soldNumbers).sort((a, b) => parseInt(a) - parseInt(b));
             
             sortedNumbers.forEach(n => {
@@ -1967,6 +2553,11 @@
                             </span>
                         </td>
                         <td>
+                            ${u.fuente === 'link_bio' ? 
+                                '<span style="color:#8b5cf6; font-size:0.8rem;" title="Desde Link Bio">🌐 Link Bio</span>' : 
+                                '<span style="color:#6366f6; font-size:0.8rem;" title="Local">📱 Local</span>'}
+                        </td>
+                        <td>
                             <div style="display:flex; gap:10px;">
                                 <button onclick="sendWhatsAppCobro('${n}')" title="Enviar mensaje" style="color:#fbbf24; background:none; border:none; cursor:pointer; padding: 8px; border-radius: 8px; background: rgba(251, 191, 36, 0.1);">
                                     <i class="fab fa-whatsapp"></i>
@@ -1984,7 +2575,6 @@
                 }
             });
             
-            // Actualizar estadísticas
             document.getElementById('statRecaudado').textContent = formatMoney(totalRecaudado);
             document.getElementById('statPendiente').textContent = formatMoney(totalPendiente);
             
@@ -1994,90 +2584,20 @@
                 `${soldCount}/${TOTAL_NUMBERS} (${Math.round(progressPercentage)}%)`;
         }
         
-        function sendWhatsApp() {
-    if (!WHATSAPP_NUMBER || !isValidWhatsAppNumber(WHATSAPP_NUMBER)) {
-        alert("WhatsApp no configurado");
-        return;
-    }
-
-    const nom = document.getElementById('uNombre').value.trim();
-    const ciu = document.getElementById('uCiudad').value.trim();
-    let cel = document.getElementById('uCelular').value.trim();
-
-    if (!nom || !ciu || !cel || selected.length === 0) {
-        alert("Completa tus datos y selecciona números");
-        return;
-    }
-
-    cel = cel.replace(/\D/g, '');
-
-    const total = selected.length * window.db.price;
-
-    // 🔥 MENSAJE OPTIMIZADO (CORTO = NO FALLA)
-    const msg = encodeURIComponent(
-        `RESERVA SB DINÁMICAS\n\n` +
-        `Nombre: ${nom}\n` +
-        `Ciudad: ${ciu}\n` +
-        `Cel: ${cel}\n\n` +
-        `Numeros: ${selected.join(', ')}\n` +
-        `Total: ${formatMoney(total)}`
-    );
-
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
-
-    // ✅ MÉTODO DEFINITIVO (NO BLOQUEABLE)
-    const wa = document.getElementById('waSender');
-    wa.href = url;
-    wa.click();
-
-    // 🟢 GUARDAR DESPUÉS
-    const fecha = new Date().toISOString();
-    selected.forEach(n => {
-        if (!window.db.soldNumbers[n]) {
-            window.db.soldNumbers[n] = {
-                nombre: nom,
-                ciudad: ciu,
-                celular: cel,
-                pagado: false,
-                fecha: fecha
-            };
-        }
-    });
-
-    save();
-    selected = [];
-    updateUI();
-}
-        
-        function uploadImg(input) {
-            if (!input.files || !input.files[0]) return;
+        function sendWhatsAppCobro(n) {
+            if (!window.db.soldNumbers[n]) return;
             
-            const file = input.files[0];
+            const cliente = window.db.soldNumbers[n];
+            const monto = window.db.price;
+            const msg = encodeURIComponent(
+                `Hola ${cliente.nombre},\n\n` +
+                `Te recordamos el pago pendiente por el número ${n}.\n` +
+                `Monto: ${formatMoney(monto)}\n` +
+                `Fecha de reserva: ${new Date(cliente.fecha).toLocaleDateString('es-CO')}\n\n` +
+                `Por favor realiza el pago para confirmar tu participación.`
+            );
             
-            // Validar tamaño (5MB máximo)
-            if (file.size > 5 * 1024 * 1024) {
-                showNotification("La imagen no debe superar 5MB", "error");
-                input.value = '';
-                return;
-            }
-            
-            // Validar tipo
-            if (!file.type.match('image.*')) {
-                showNotification("Solo se permiten imágenes", "error");
-                input.value = '';
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = (e) => { 
-                window.db.img = e.target.result; 
-                save();
-                showNotification("Imagen cargada exitosamente", "success");
-            };
-            reader.onerror = () => {
-                showNotification("Error al cargar la imagen", "error");
-            };
-            reader.readAsDataURL(file);
+            window.open(`https://wa.me/57${cliente.celular}?text=${msg}`, '_blank');
         }
         
         function togglePaid(n) {
@@ -2102,31 +2622,6 @@
                 save();
                 showNotification(`Número ${n} liberado`, "info");
             }
-        }
-        
-        function saveConfig() {
-            const title = document.getElementById('setPrizeTitle').value.trim();
-            const desc = document.getElementById('setPrizeDesc').value.trim();
-            const price = parseInt(document.getElementById('setPrizePrice').value);
-            const statusEl = document.getElementById('configStatus');
-            
-            if(!title || !desc || !price || price < 1000) {
-                showStatus(statusEl, "Completa todos los campos con valores válidos", "error");
-                return;
-            }
-            
-            window.db.prize = escapeHTML(title);
-            window.db.desc = escapeHTML(desc);
-            window.db.price = price;
-            window.db.lastUpdate = new Date().toISOString();
-            
-            save();
-            showStatus(statusEl, "✅ Configuración guardada", "success");
-            showNotification("Configuración actualizada", "success");
-            
-            setTimeout(() => {
-                showTab('admin-panel');
-            }, 1500);
         }
         
         function clearAllData() {
@@ -2166,13 +2661,34 @@
             }
         }
         
+        function sincronizarAhora() {
+            if (window.cargarDatosDesdeLinkBio) {
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<span class="spinner"></span> Sincronizando...';
+                btn.disabled = true;
+                
+                window.cargarDatosDesdeLinkBio()
+                    .then(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        showNotification("✅ Datos sincronizados desde Link Bio", "success");
+                    })
+                    .catch(err => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        showNotification("❌ Error sincronizando", "error");
+                        console.error("Link Bio sync error:", err);
+                    });
+            }
+        }
+        
         function exportToExcel() {
-            // Implementación básica de exportación
-            let csv = 'Número,Nombre,Ciudad,Celular,Estado,Fecha\n';
+            let csv = 'Número,Nombre,Ciudad,Celular,Estado,Fecha,Origen,Sincronizado Link Bio\n';
             
             Object.keys(window.db.soldNumbers).sort().forEach(n => {
                 const u = window.db.soldNumbers[n];
-                csv += `"${n}","${u.nombre}","${u.ciudad}","${u.celular}","${u.pagado?'PAGADO':'PENDIENTE'}","${u.fecha}"\n`;
+                csv += `"${n}","${u.nombre}","${u.ciudad}","${u.celular}","${u.pagado?'PAGADO':'PENDIENTE'}","${u.fecha}","${u.fuente || 'local'}","${u.sincronizadoLinkBio ? 'SÍ' : 'NO'}"\n`;
             });
             
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -2180,7 +2696,7 @@
             const url = URL.createObjectURL(blob);
             
             link.setAttribute('href', url);
-            link.setAttribute('download', `sorteo_${new Date().toISOString().split('T')[0]}.csv`);
+            link.setAttribute('download', `sorteo_linkbio_${new Date().toISOString().split('T')[0]}.csv`);
             link.style.visibility = 'hidden';
             
             document.body.appendChild(link);
@@ -2191,17 +2707,15 @@
         }
         
         function save() {
-    // Guardar siempre en local para respaldo inmediato
-    localStorage.setItem('sb_dinamicas_premium_db', JSON.stringify(window.db));
-    
-    // Intentar guardar en Firebase SIEMPRE que haya una función de guardado disponible
-    if (window.saveToFirestore) {
-        window.saveToFirestore().catch(err => {
-            console.error("Error de sincronización:", err);
-        });
-    }
-    updateUI();
-}
+            localStorage.setItem('sb_dinamicas_premium_db', JSON.stringify(window.db));
+            
+            if (window.saveToFirestore) {
+                window.saveToFirestore().catch(err => {
+                    console.error("Error de sincronización:", err);
+                });
+            }
+            updateUI();
+        }
 
         function showInstructions() {
             const instructions = `
@@ -2220,12 +2734,18 @@
                 3. APARTA POR WHATSAPP
                    - Se abrirá WhatsApp con tu reserva
                    - Tienes 24 horas para pagar
+                   - ✅ Sincronizado automáticamente con Link Bio
 
                 4. ESTADOS DE LOS NÚMEROS:
                    - 🔵 Disponible: Puedes seleccionarlo
                    - 🟡 Apartado: Reservado, pendiente pago
                    - 🟢 Pagado: Confirmado, no disponible
                    - 🔴 Seleccionado: Tus números elegidos
+
+                5. 🌐 SINCRONIZACIÓN CON LINK BIO:
+                   - Todos los números se sincronizan automáticamente
+                   - Evita duplicados entre diferentes apps
+                   - Estado visible en la esquina inferior derecha
 
                 📞 Soporte: Contacta al organizador
             `;
@@ -2238,33 +2758,30 @@
         // =============================================
         
         function initApp() {
-            // Inicializar WhatsApp
             initWhatsAppNumber();
             
-            // Actualizar UI
             updateUI();
             
-            // ✅ CORRECCIÓN CRÍTICA: SIEMPRE empezar en vista usuario
-            // Esto evita que cualquiera vea el panel admin al recargar
             showTab('user');
             
-            // Mostrar bienvenida
             setTimeout(() => {
                 showNotification("Bienvenido a SB Dinámicas Premium 🎉", "success", 3000);
+                showNotification("Sincronizando con Link Bio... 🔄", "info", 2000);
+                
+                if (window.testConexionLinkBio) {
+                    window.testConexionLinkBio();
+                }
             }, 1000);
             
             console.log("✅ App SB Dinámicas Premium inicializada");
-            console.log("Modo seguro activado: siempre empieza en vista usuario");
         }
         
-        // Inicializar cuando el DOM esté listo
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initApp);
         } else {
             initApp();
         }
         
-        // Exponer funciones globalmente para Firebase
         window.hideWhatsAppAlert = hideWhatsAppAlert;
         window.showWhatsAppAlert = showWhatsAppAlert;
         window.updateUI = updateUI;
@@ -2272,105 +2789,94 @@
     
     <!-- FIREBASE CON SEGURIDAD CORREGIDA -->
     <script type="module">
-    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    
-    const firebaseConfig = {
-        apiKey: "AIzaSyC8j6OmhdGkyF_Jw0Fz88BG0fWuixnY-EY",
-        authDomain: "sbdinamicas-2025.firebaseapp.com",
-        projectId: "sbdinamicas-2025",
-        storageBucket: "sbdinamicas-2025.firebasestorage.app",
-        messagingSenderId: "465275725018",
-        appId: "1:465275725018:web:9f58c09a23a74a419171e3"
-    };
-    
-    const app = initializeApp(firebaseConfig);
-    const firestore = getFirestore(app);
-    const auth = getAuth(app);
-    const docRef = doc(firestore, "sorteos", "premium_v2");
-
-    // --- FUNCIÓN PARA GUARDAR DATOS (SÓLO SI ES ADMIN) ---
-    window.saveToFirestore = async () => {
-    // Eliminamos la restricción: if (!auth.currentUser) return;
-    try {
-        await setDoc(docRef, {
-            prize: window.db.prize,
-            desc: window.db.desc,
-            price: window.db.price,
-            img: window.db.img || "",
-            soldNumbers: window.db.soldNumbers,
-            whatsappNumber: window.db.whatsappNumber,
-            configCompleta: window.db.configCompleta || {}
-        }, { merge: true }); // Usamos merge para no sobreescribir todo accidentalmente
-        console.log("🔥 Sincronizado en la nube");
-    } catch (e) {
-        console.error("Error guardando:", e);
-    }
-};
-
-    // --- MANEJO DE LOGIN ---
-    document.getElementById('btnLoginFirebase').onclick = async () => {
-        const email = document.getElementById('adminEmail').value;
-        const password = document.getElementById('adminPass').value;
+        import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
         
-        const btn = document.getElementById('btnLoginFirebase');
-        btn.disabled = true;
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8j6OmhdGkyF_Jw0Fz88BG0fWuixnY-EY",
+            authDomain: "sbdinamicas-2025.firebaseapp.com",
+            projectId: "sbdinamicas-2025",
+            storageBucket: "sbdinamicas-2025.firebasestorage.app",
+            messagingSenderId: "465275725018",
+            appId: "1:465275725018:web:9f58c09a23a74a419171e3"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+        const auth = getAuth(app);
+        const docRef = doc(firestore, "sorteos", "premium_v2");
 
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            window.db.isAdmin = true;
-            showNotification("✅ Acceso concedido", "success");
-            showTab('admin-panel');
-        } catch (err) {
-            showNotification("❌ Error: " + err.code, "error");
-        } finally {
-            btn.disabled = false;
-        }
-    };
+        window.saveToFirestore = async () => {
+            try {
+                await setDoc(docRef, {
+                    prize: window.db.prize,
+                    desc: window.db.desc,
+                    price: window.db.price,
+                    img: window.db.img || "",
+                    soldNumbers: window.db.soldNumbers,
+                    whatsappNumber: window.db.whatsappNumber,
+                    configCompleta: window.db.configCompleta || {}
+                }, { merge: true });
+                console.log("🔥 Sincronizado en la nube");
+            } catch (e) {
+                console.error("Error guardando:", e);
+            }
+        };
 
-    // --- MANEJO DE LOGOUT ---
-    document.getElementById('btnLogout').onclick = async () => {
-        await signOut(auth);
-        window.db.isAdmin = false;
-        showTab('user');
-        location.reload(); // Recargar para limpiar estado
-    };
-
-    // --- ESCUCHADOR DE ESTADO ---
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            console.log("Admin detectado:", user.email);
-            window.db.isAdmin = true;
+        document.getElementById('btnLoginFirebase').onclick = async () => {
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPass').value;
             
-            // Escuchar cambios en tiempo real
-            onSnapshot(docRef, (snap) => {
-                if (snap.exists()) {
-                    const data = snap.data();
-                    window.db.soldNumbers = data.soldNumbers || {};
-                    window.db.prize = data.prize;
-                    window.db.price = data.price;
-                    window.db.whatsappNumber = data.whatsappNumber;
-                    window.db.configCompleta = data.configCompleta;
-                    window.updateUI();
-                }
-            });
-        } else {
+            const btn = document.getElementById('btnLoginFirebase');
+            btn.disabled = true;
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                window.db.isAdmin = true;
+                showNotification("✅ Acceso concedido", "success");
+                showTab('admin-panel');
+            } catch (err) {
+                showNotification("❌ Error: " + err.code, "error");
+            } finally {
+                btn.disabled = false;
+            }
+        };
+
+        document.getElementById('btnLogout').onclick = async () => {
+            await signOut(auth);
             window.db.isAdmin = false;
-            // Si no hay admin, solo leemos los datos una vez para el usuario
-            getDoc(docRef).then(snap => {
-                if(snap.exists()){
-                    window.db.soldNumbers = snap.data().soldNumbers || {};
-                    window.updateUI();
-                }
-            });
-        }
-    });
-</script>
-<a id="waSender"
-   href="#"
-   target="_blank"
-   rel="noopener"
-   style="display:none;"></a>
+            showTab('user');
+            location.reload();
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("Admin detectado:", user.email);
+                window.db.isAdmin = true;
+                
+                onSnapshot(docRef, (snap) => {
+                    if (snap.exists()) {
+                        const data = snap.data();
+                        window.db.soldNumbers = data.soldNumbers || {};
+                        window.db.prize = data.prize;
+                        window.db.price = data.price;
+                        window.db.whatsappNumber = data.whatsappNumber;
+                        window.db.configCompleta = data.configCompleta;
+                        window.updateUI();
+                    }
+                });
+            } else {
+                window.db.isAdmin = false;
+                getDoc(docRef).then(snap => {
+                    if(snap.exists()){
+                        window.db.soldNumbers = snap.data().soldNumbers || {};
+                        window.updateUI();
+                    }
+                });
+            }
+        });
+    </script>
+    <a id="waSender" href="#" target="_blank" rel="noopener" style="display:none;"></a>
 </body>
 </html>
